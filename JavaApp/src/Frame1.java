@@ -67,14 +67,13 @@ public class Frame1 {
 	}
 	private void initLibraryManagementUI() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 600, 131);
+		frame.setBounds(100, 100, 800, 800);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		JButton insertBookFormButton = new JButton("Thêm sách vào thư viện");
+		JButton insertBookFormButton = new JButton("Quản lý đầu sách thư viện");
 		insertBookFormButton.setBounds(0, 0, 200, 50);
 		insertBookFormButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				week = 1;
 				InsertBookForm week1 = new InsertBookForm();
 				week1.pack();
 				week1.setSize(800, 800);
@@ -85,11 +84,10 @@ public class Frame1 {
 		frame.getContentPane().add(insertBookFormButton);
 		
 
-		JButton insertReaderButton = new JButton("Đăng kí thẻ độc giả");
+		JButton insertReaderButton = new JButton("Quản lý độc giả");
 		insertReaderButton.setBounds(200, 0, 200, 50);
 		insertReaderButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				week = 1;
 				InsertReader week1 = new InsertReader();
 				week1.pack();
 				week1.setSize(800, 800);
@@ -97,6 +95,18 @@ public class Frame1 {
 			}
 		});
 		frame.getContentPane().add(insertReaderButton);
+
+		JButton staffManagementButton = new JButton("Quản lý nhân viên");
+		staffManagementButton.setBounds(400, 0, 200, 50);
+		staffManagementButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				StaffManagement week1 = new StaffManagement();
+				week1.pack();
+				week1.setSize(800, 800);
+				week1.setVisible(true);
+			}
+		});
+		frame.getContentPane().add(staffManagementButton);
 	}
 	
 

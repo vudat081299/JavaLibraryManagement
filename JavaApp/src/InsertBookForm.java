@@ -2,12 +2,12 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.*;
-import javax.swing.JTable;
-import javax.swing.JTextField;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -15,45 +15,169 @@ import javax.swing.table.DefaultTableModel;
 //import javax.swing.table.TableModel;
 //import javax.swing.table.DefaultTableCellRenderer;
 
-import java.util.Arrays; 
+//import java.util.Arrays; 
 //import java.util.ArrayList; 
 //import java.util.List;
 
-public class InsertBookForm extends JDialog {
-	private static final TableModelListener InsertBookForm = null;
-	int countRow = 0;
+import java.sql.*;
 
-	Connection myConn = null;
-	Statement myStmt = null;
-	ResultSet myRs = null;
-	DefaultTableModel model = new DefaultTableModel(new String[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách"}, 0);
+public class InsertBookForm extends JDialog {
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	// variables, definitions
+//	private static final TableModelListener InsertBookForm = null;
 	
-	String listColumn[] = {"id", "name", "type", "author", "publisher", "publishedDate", "dataType"};
-	static <T> T[] append(T[] arr, T element) {
-	    final int N = arr.length;
-	    arr = Arrays.copyOf(arr, N + 1);
-	    arr[N] = element;
-	    return arr;
+	// UI
+	JLabel name;
+	JTextField nameInput;
+	JLabel type;
+	JTextField typeInput;
+	JLabel author;
+	JTextField authorInput;
+	JLabel nxb;
+	JTextField nxbInput;
+	JLabel publisedhDate;
+	JTextField publisedhDateInput;
+	JLabel dataType;
+	JTextField dataTypeInput;
+	JButton addBookButton;
+	
+	JLabel titleTable;
+	JScrollPane sp;
+	JTable jt;
+	
+	// init default data for variables, definitions
+	DefaultTableModel model;
+	int countRow = 0; // total row of table 
+	
+	// info of DB
+	String listColumn[] = {"id", "name", "type", "author", "publisher", "publishedDate", "dataType"}; // list column of DB
+	String url;
+	String username;
+	String password;
+	String tableName;
+	// DB instance
+	Connection myConn;
+	Statement myStmt;
+	ResultSet myRs;
+	
+	boolean isAddition;
+	String insertQuery;
+	String selectAllQuery;
+	
+	public InsertBookForm() {
+		// initializers - not for array constants
+
+		url = "jdbc:mysql://localhost:3306/";
+		username = "root";
+		password = "Iviundhacthi8987m";
+		tableName = "LibraryManagementDB";
+		isAddition = false;
+
+		insertQuery = "insert into Book (id, name, type, author, publisher, publishedDate, dataType)"
+					+ " values (?, ?, ?, ?, ?, ?, ?)";
+		selectAllQuery = "select * from Book";
+		
+		// force call 
+		prerequisiteSetting();
+		renderUIElement();
+		loadDataFromDB();
+		
+		addBookButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					// 1. Get a connection to database
+					myConn = DriverManager.getConnection(url + tableName, username, password);
+					
+					// 2. Create a statement
+					myStmt = myConn.createStatement();
+					
+					// the mysql insert statement
+				    String query = insertQuery;
+
+				    // create the mysql insert preparedstatement
+				    PreparedStatement preparedStmt = myConn.prepareStatement(query);
+				    preparedStmt.setInt    (1, ++countRow);
+				    preparedStmt.setString (2, nameInput.getText());
+				    preparedStmt.setString (3, typeInput.getText());
+				    preparedStmt.setString (4, authorInput.getText());
+				    preparedStmt.setString (5, nxbInput.getText());
+				    preparedStmt.setString (6, publisedhDateInput.getText());
+				    preparedStmt.setString (7, dataTypeInput.getText());
+	
+				    // execute the preparedstatement
+				    preparedStmt.execute();
+				    isAddition = true;
+				    model.addRow(new Object[]{countRow, nameInput.getText(), typeInput.getText(), authorInput.getText(), 
+				    		nxbInput.getText(), publisedhDateInput.getText(), dataTypeInput.getText()});	
+
+					// force call last
+				    myConn.close();
+				} catch (Exception exc) {
+					exc.printStackTrace();
+				}
+			}
+		});
+		
+	    jt.getModel().addTableModelListener(new TableModelListener(){
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				
+				if (isAddition) {
+					isAddition = false;
+				} else {
+					// TODO Auto-generated method stub
+			        int row = e.getFirstRow();
+			        int column = e.getColumn();
+			        if (column == 0) {
+			        	return;
+			        }
+			        
+			        String sqlupdate = "UPDATE Book SET " + listColumn[column] + " = '" + model.getValueAt(row, column) + "' WHERE id = " + ++row;
+					if(column != 0) {
+						try {
+							// 1. Get a connection to database
+							myConn = DriverManager.getConnection(url + tableName, username, password);
+							
+							// 2. Create a statement
+							myStmt = myConn.createStatement();
+							
+				            PreparedStatement pst = myConn.prepareStatement(sqlupdate);
+				            pst.executeUpdate();
+	
+							// force call last
+				            myConn.close();
+						} catch (Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+				}
+			}
+        });
 	}
 	
-	void loadData() {
-//		model = null;
-//		model = new DefaultTableModel(new String[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách"}, 0);
+	
 
+	// methods
+	void print(String string) {
+		System.out.print(string);
+	}
+	void loadDataFromDB() {
 		try {
 			// 1. Get a connection to database
-			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/LibraryManagementDB", "root" , "Iviundhacthi8987m");
+			myConn = DriverManager.getConnection(url + tableName, username, "Iviundhacthi8987m");
 			
 			// 2. Create a statement
 			myStmt = myConn.createStatement();
 			
 			// 3. Execute SQL query
-			myRs = myStmt.executeQuery("select * from Book");
+			myRs = myStmt.executeQuery(selectAllQuery);
 			
 			// 4. Process the result set
 			while (myRs.next()) {
-				System.out.println(myRs.getString("name") + ", " + myRs.getString("author"));
-
 			    String a = myRs.getString("id");
 			    String b = myRs.getString("name");
 			    String c = myRs.getString("type");
@@ -65,7 +189,8 @@ public class InsertBookForm extends JDialog {
 
 			}
 			countRow = model.getRowCount();
-
+			
+			// force call last
             myConn.close();
 		}
 		catch (Exception exc) {
@@ -73,149 +198,83 @@ public class InsertBookForm extends JDialog {
 		}
 	}
 	
-	public InsertBookForm() {
-		loadData();
-		
+	// prerequisite setting for this dialog type view
+	void prerequisiteSetting() {
 		pack();
 		setModal(true);
 		setResizable(true);
 		getContentPane().setLayout(null);
-		
+	}
+	
+	void renderUIElement() {
 		//
-		JTextField nameInput = new JTextField("", 5);
-		nameInput.setBounds(160, 0, 200, 50);
-		add(nameInput);
-
-		JLabel name = new JLabel("Tên đầu sách");
+		name = new JLabel("Tên đầu sách");
 		name.setBounds(10, 0, 100, 50);
-		add(name);
+		nameInput = new JTextField("", 5);
+		nameInput.setBounds(160, 0, 200, 50);
 
 		//
-		JTextField typeInput = new JTextField("", 5);
-		typeInput.setBounds(160, 50, 200, 50);
-		add(typeInput);
-
-		JLabel type = new JLabel("Loại sách");
+		type = new JLabel("Loại sách");
 		type.setBounds(10, 50, 100, 50);
-		add(type);
+		typeInput = new JTextField("", 5);
+		typeInput.setBounds(160, 50, 200, 50);
 		
 		//
-		JTextField authorInput = new JTextField("", 5);
-		authorInput.setBounds(160, 100, 200, 50);
-		add(authorInput);
-
-		JLabel author = new JLabel("Tác giả");
+		author = new JLabel("Tác giả");
 		author.setBounds(10, 100, 100, 50);
-		add(author);
-		
-		//
-		JTextField nxbInput = new JTextField("", 5);
-		nxbInput.setBounds(510, 0, 200, 50);
-		add(nxbInput);
+		authorInput = new JTextField("", 5);
+		authorInput.setBounds(160, 100, 200, 50);
 
-		JLabel nxb = new JLabel("Nhà xuất bản");
+		//
+		nxb = new JLabel("Nhà xuất bản");
 		nxb.setBounds(370, 0, 100, 50);
-		add(nxb);
+		nxbInput = new JTextField("", 5);
+		nxbInput.setBounds(510, 0, 200, 50);
 
 		//
-		JTextField publisedhDateInput = new JTextField("", 5);
-		publisedhDateInput.setBounds(510, 50, 200, 50);
-		add(publisedhDateInput);
-
-		JLabel publisedhDate = new JLabel("Ngày xuất bản");
+		publisedhDate = new JLabel("Ngày xuất bản");
 		publisedhDate.setBounds(370, 50, 100, 50);
-		add(publisedhDate);
+		publisedhDateInput = new JTextField("", 5);
+		publisedhDateInput.setBounds(510, 50, 200, 50);
 
 		//
-		JTextField dataTypeInput = new JTextField("", 5);
-		dataTypeInput.setBounds(510, 100, 200, 50);
-		add(dataTypeInput);
-
-		JLabel dataType = new JLabel("Kiểu sách");
+		dataType = new JLabel("Kiểu sách");
 		dataType.setBounds(370, 100, 100, 50);
-		add(dataType);
+		dataTypeInput = new JTextField("", 5);
+		dataTypeInput.setBounds(510, 100, 200, 50);
 
-		JButton addBookButton = new JButton("Thêm đầu sách vào thư viện");
+		// button
+		addBookButton = new JButton("Thêm đầu sách vào thư viện");
 		addBookButton.setBounds(300, 150, 200, 50);
-		addBookButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					// 1. Get a connection to database
-					myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/LibraryManagementDB", "root" , "Iviundhacthi8987m");
-					
-					// 2. Create a statement
-					myStmt = myConn.createStatement();
-					
-					  // the mysql insert statement
-				      String query = " insert into Book (id, name, type, author, publisher, publishedDate, dataType)"
-				        + " values (?, ?, ?, ?, ?, ?, ?)";
-
-			      // create the mysql insert preparedstatement
-			      PreparedStatement preparedStmt = myConn.prepareStatement(query);
-			      preparedStmt.setInt    (1, ++countRow);
-			      preparedStmt.setString (2, nameInput.getText());
-			      preparedStmt.setString (3, typeInput.getText());
-			      preparedStmt.setString (4, authorInput.getText());
-			      preparedStmt.setString (5, nxbInput.getText());
-			      preparedStmt.setString (6, publisedhDateInput.getText());
-			      preparedStmt.setString (7, dataTypeInput.getText());
-
-			      // execute the preparedstatement
-			      preparedStmt.execute();
-			      
-			      myConn.close();
-
-//					loadData();
-//					model.addRow(new Object[]{1, "Column 2", "Column 3", "Column 3", "Column 3"});
-//				    model.addRow(new Object[]{countRow, nameInput.getText(), typeInput.getText(), authorInput.getText(), nxbInput.getText(), publisedhDateInput.getText(), dataTypeInput.getText()});
-				} catch (Exception exc) {
-					exc.printStackTrace();
-				}
-			}
-		});
-		add(addBookButton);
 		
-
-		JLabel titleTable = new JLabel("Bảng danh sách đầu sách trong thư viện");
+		// 
+		titleTable = new JLabel("Bảng danh sách các đầu sách trong thư viện");
 		titleTable.setBounds(10,-20,780,500);
-		add(titleTable);
-	    JTable jt = new JTable(model);    
-	    jt.setBounds(10,250,780,500);          
-	    jt.getModel().addTableModelListener(new TableModelListener(){
-			@Override
-			public void tableChanged(TableModelEvent e) {
-				// TODO Auto-generated method stub
-
-		        int row = e.getFirstRow();
-		        int column = e.getColumn();
-		        if (column == 0) {
-		        	return;
-		        }
-		        Object data = model.getValueAt(row, column);
-		        
-		        String sqlupdate = "UPDATE Book SET " + listColumn[column] + " = '" + data + "' WHERE id = " + ++row;
-				if(column != 0) {
-					try {
-						// 1. Get a connection to database
-						myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/LibraryManagementDB", "root" , "Iviundhacthi8987m");
-						
-						// 2. Create a statement
-						myStmt = myConn.createStatement();
-						
-			            PreparedStatement pst = myConn.prepareStatement(sqlupdate);
-			            pst.executeUpdate();
-			            myConn.close();
-					} catch (Exception exc) {
-						exc.printStackTrace();
-					}
-				}
-			}
-        });
+		model = new DefaultTableModel(new Object[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách"}, 0);
+	    jt = new JTable(model);    
+	    jt.setBounds(10,250,780,500); 
+	    sp = new JScrollPane(jt); 
+	    sp.setBounds(10,250,780,440);   
+		
+		add(name);
+		add(nameInput);
+		add(type);
+		add(typeInput);
+		add(author);
+		add(authorInput);
+		add(nxb);
+		add(nxbInput);
+		add(publisedhDate);
+		add(publisedhDateInput);
+		add(dataType);
+		add(dataTypeInput);
+		add(addBookButton); // button
+		add(titleTable);   
+	    add(sp); // scroll pane
+	    
+	    // set centre header for table
 //	    DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) jt.getTableHeader().getDefaultRenderer();
-//	    renderer.setHorizontalAlignment(0);
-	    JScrollPane sp = new JScrollPane(jt); 
-	    sp.setBounds(10,250,780,440);      
-	    add(sp);             
+//	    renderer.setHorizontalAlignment(0);         
 //	    setVisible(true);    
 	}
 
