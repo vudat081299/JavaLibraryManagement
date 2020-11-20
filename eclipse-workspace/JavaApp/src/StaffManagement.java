@@ -104,7 +104,7 @@ public class StaffManagement extends JDialog {
 		nxb.setBounds(370, 0, 100, 50);
 		add(nxb);
 
-		JButton addBookButton = new JButton("Thêm nhân viên vào thư viện");
+		JButton addBookButton = new JButton("Đăng kí nhân viên");
 		addBookButton.setBounds(300, 150, 200, 50);
 		addBookButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

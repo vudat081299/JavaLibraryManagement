@@ -15,6 +15,10 @@ public class Frame1 {
 	private JFrame frame;
 	static int week = 0;
 	boolean renderLibraryUI = true;
+	String titleOfAppFrame = "Quản lý thư viện";
+	String titleOfBookManagementFrame = "Quản lý đầu sách";
+	String titleOfReaderManagementFrame = "Quản lý độc giả";
+	String titleOfStaffManagementFrame = "Quản lý nhân viên";
 	/**
 	 * Launch the application.
 	 */
@@ -67,16 +71,17 @@ public class Frame1 {
 	}
 	private void initLibraryManagementUI() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 800, 800);
+		frame.setBounds(100, 100, 750, 800);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setTitle(titleOfAppFrame);
 		
-		JButton insertBookFormButton = new JButton("Quản lý đầu sách thư viện");
-		insertBookFormButton.setBounds(0, 0, 200, 50);
+		JButton insertBookFormButton = new JButton(titleOfBookManagementFrame);
+		insertBookFormButton.setBounds(50, 50, 300, 200);
 		insertBookFormButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				InsertBookForm week1 = new InsertBookForm();
 				week1.pack();
-				week1.setSize(800, 800);
+				week1.setSize(1200, 800);
 				week1.setVisible(true);
 			}
 		});
@@ -84,8 +89,8 @@ public class Frame1 {
 		frame.getContentPane().add(insertBookFormButton);
 		
 
-		JButton insertReaderButton = new JButton("Quản lý độc giả");
-		insertReaderButton.setBounds(200, 0, 200, 50);
+		JButton insertReaderButton = new JButton(titleOfReaderManagementFrame);
+		insertReaderButton.setBounds(400, 50, 300, 200);
 		insertReaderButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				InsertReader week1 = new InsertReader();
@@ -96,8 +101,8 @@ public class Frame1 {
 		});
 		frame.getContentPane().add(insertReaderButton);
 
-		JButton staffManagementButton = new JButton("Quản lý nhân viên");
-		staffManagementButton.setBounds(400, 0, 200, 50);
+		JButton staffManagementButton = new JButton(titleOfStaffManagementFrame);
+		staffManagementButton.setBounds(50, 300, 300, 200);
 		staffManagementButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				StaffManagement week1 = new StaffManagement();
