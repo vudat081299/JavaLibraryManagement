@@ -90,7 +90,6 @@ public class InsertBookForm extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				if (!validate("")) {
 					print("----");
-					System.out.print(validate(""));
 					return;
 				}
 
@@ -170,27 +169,30 @@ public class InsertBookForm extends JDialog {
 
 	// methods
 	public boolean validate(String string) {
-	    if (nameInput.getText().length() == 0 || 
-	    		typeInput.getText().length() == 0 || 
-	    		authorInput.getText().length() == 0 || 
-	    		nxbInput.getText().length() == 0 ||
-	    		publisedhDateInput.getText().length() == 0 || 
-	    		dataTypeInput.getText().length() == 0) {
-	    	print("Validate false!");
+	    if (nameInput.getText() == null || 
+	    		typeInput.getText() == null || 
+	    		authorInput.getText() == null || 
+	    		nxbInput.getText() == null ||
+	    		publisedhDateInput.getText() == null || 
+	    		dataTypeInput.getText() == null ||
+	    		nameInput.getText() == string || 
+	    		typeInput.getText() == string || 
+	    		authorInput.getText() == string || 
+	    		nxbInput.getText() == string ||
+	    		publisedhDateInput.getText() == string || 
+	    		dataTypeInput.getText() == string) {
 	    	return false;
-	    } else {
-	    	print("Validate true!");
-			return true;
 	    }
+		return true;
 	}
 
 	void print(String string) {
-		System.out.println(string);
+		System.out.print(string);
 	}
 	void loadDataFromDB() {
 		try {
 			// 1. Get a connection to database
-			myConn = DriverManager.getConnection(url + tableName, username, password);
+			myConn = DriverManager.getConnection(url + tableName, username, "Iviundhacthi8987m");
 			
 			// 2. Create a statement
 			myStmt = myConn.createStatement();
