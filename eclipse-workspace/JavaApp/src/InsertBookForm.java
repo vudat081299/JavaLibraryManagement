@@ -27,6 +27,10 @@ import javax.swing.table.DefaultTableModel;
 
 import java.sql.*;
 import java.util.Vector;
+//import java.util.*; 
+import java.util.Arrays; 
+import java.util.Collections;
+import java.util.Comparator; 
 
 public class InsertBookForm extends JDialog {
 /**
@@ -63,7 +67,9 @@ public class InsertBookForm extends JDialog {
 	// init default data for variables, definitions
 	boolean pressingCTRL=false;//flag, if pressing CTRL it is true, otherwise it is false.
 //	Vector<int[]> selectedCells = new Vector<int[]>();
-	Vector<int[]> selectedCells = new Vector<int[]>();
+//	Vector<int> selectedCells = new Vector<int>();
+    Vector<String> selectedCells = new Vector<String>();
+    
 	DefaultTableModel model;
 	int countRow = 0; // total row of table 
 	
@@ -80,6 +86,7 @@ public class InsertBookForm extends JDialog {
 	ResultSet myRs;
 	
 	boolean isAddition;
+	boolean isRemoval;
 	String insertQuery;
 	String removeQuery;
 	String selectAllQuery;
@@ -95,7 +102,7 @@ public class InsertBookForm extends JDialog {
 
 		insertQuery = "insert into Book (id, name, type, author, publisher, publishedDate, dataType)"
 					+ " values (?, ?, ?, ?, ?, ?, ?)";
-		removeQuery = "DELETE FROM Table WHERE name = ?";
+		removeQuery = "DELETE FROM Book WHERE id = ?";
 		selectAllQuery = "select * from Book";
 		
 		// force call 
@@ -104,56 +111,58 @@ public class InsertBookForm extends JDialog {
 		loadDataFromDB();
 		
 		//
-		   KeyListener tableKeyListener = (KeyListener) new KeyAdapter() {
-			      @Override
-			      public void keyPressed(KeyEvent e) {
-			    	  System.out.println(e);
-			         if(e.getKeyCode()==157){//check if user is pressing CTRL key
-			            pressingCTRL=true;
-			         }
-			      }
+		KeyListener tableKeyListener = (KeyListener) new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+			    isRemoval = true;
+				System.out.println(e);
+				if(e.getKeyCode()==157){//check if user is pressing CTRL key
+					pressingCTRL=true;
+				}
+			}
 
-			      @Override
-			      public void keyReleased(KeyEvent e) {
-			         if(e.getKeyCode()==157){//check if user released CTRL key
-			            pressingCTRL=false;
-			         }
-			      }
-			   };
-		   MouseListener tableMouseListener = new MouseAdapter() {
-
-			      @Override
-			      public void mouseClicked(MouseEvent e) {
-			    	  
-						print("mouse click!");
-			            System.out.println(jt.getSelectedRowCount());
-			            System.out.println(pressingCTRL);
-			         if(pressingCTRL == true){//check if user is pressing CTRL key
-			            int row = jt.rowAtPoint(e.getPoint());//get mouse-selected row
-			            int[] newEntry = new int[]{row};//{row,col}=selected cell
-			            if(selectedCells.contains(newEntry)){
-			               //cell was already selected, deselect it
-			               selectedCells.remove(newEntry);
-							print("----++++");
-			            } else {
-			               //cell was not selected
-			               selectedCells.add(newEntry);
-			         
-			            }
-//			            for (int i = 0; i < jt.getSelectedRowCount(); i++) {
-//			            	System.out.println(selectedCells.get(0));
-//			            }
-			         if (selectedCells.size() > 0) {
-							print("----");
-		            	System.out.println(selectedCells.get(0));
-						print("----");
-		            }
-			         }
-			      }
-			   };
-			   jt.addKeyListener(tableKeyListener);
-			   jt.addMouseListener(tableMouseListener);
+			@Override
+			public void keyReleased(KeyEvent e) {
+			    isRemoval = true;
+				if(e.getKeyCode()==157){//check if user released CTRL key
+					pressingCTRL=false;
+				}
+			}
+		};
 		
+		MouseListener tableMouseListener = new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+			    isRemoval = true;
+//				print("mouse click!");
+			    System.out.println("list cell selected" + selectedCells);
+				if(pressingCTRL == true){//check if user is pressing CTRL key
+					int row = jt.rowAtPoint(e.getPoint());//get mouse-selected row
+					String newEntry = "" + row;//{row,col}=selected cell
+					if(selectedCells.contains(newEntry)){
+						//cell was already selected, deselect it
+						selectedCells.remove(newEntry);
+//						print("is contain!");
+					} else {
+						//cell was not selected
+						selectedCells.add(newEntry);
+//						print("is not contain!");
+					}
+				} else {
+				    isRemoval = false;
+//					print("is single select mode!");
+				    selectedCells.clear();
+					int row = jt.rowAtPoint(e.getPoint());
+					String newEntry = "" + row;
+				    selectedCells.add(newEntry);
+				}
+			    System.out.println("list cell selected" + selectedCells);
+			}
+		};
+		jt.addKeyListener(tableKeyListener);
+		jt.addMouseListener(tableMouseListener);
+		
+		//
 		addBookButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (!validate("")) {
@@ -184,6 +193,7 @@ public class InsertBookForm extends JDialog {
 				    preparedStmt.setString (7, dataTypeInput.getText());
 	
 				    // execute the preparedstatement
+				    System.out.println(preparedStmt);
 				    preparedStmt.execute();
 				    isAddition = true;
 				    model.addRow(new Object[]{countRow, nameInput.getText(), typeInput.getText(), authorInput.getText(), 
@@ -199,50 +209,104 @@ public class InsertBookForm extends JDialog {
 		
 		removeBookButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-print("-----");
-System.out.println(selectedCells.size());
-	            for (int i = 0; i < selectedCells.size(); i++) {
-	            	System.out.println(selectedCells.get(i)[0]);
-	            	System.out.println(model.getValueAt(selectedCells.get(i)[0], 0));
-	            	print("-----==");
-	            }
 
-//				try {
-//					// 1. Get a connection to database
-//					myConn = DriverManager.getConnection(url + tableName, username, password);
-//					
-//					// 2. Create a statement
-//					myStmt = myConn.createStatement();
-//					
-//					// the mysql insert statement
-//				    String query = removeQuery;
-//
-//				    // create the mysql insert preparedstatement
+				try {
+					// 1. Get a connection to database
+					myConn = DriverManager.getConnection(url + tableName, username, password);
+					
+					// 2. Create a statement
+					myStmt = myConn.createStatement();
+					
+					// the mysql insert statement
+				    String query = removeQuery;
+				    System.out.println(selectedCells);
+				    print("removing");
+				    // create the mysql insert preparedstatement
 //				    PreparedStatement preparedStmt = myConn.prepareStatement(query);
-//				    preparedStmt.setString (1, nameInput.getText());
-//	
-//				    // execute the preparedstatement
-//				    preparedStmt.execute();
-//				    isAddition = true;
+//				    PreparedStatement preparedStmt = myConn.prepareStatement(query);
+				    
+				    // execute the preparedstatement
+				    isRemoval = true;
 //				    model.addRow(new Object[]{countRow, nameInput.getText(), typeInput.getText(), authorInput.getText(), 
 //				    		nxbInput.getText(), publisedhDateInput.getText(), dataTypeInput.getText()});	
-//
-//					// force call last
-//				    myConn.close();
-//				} catch (Exception exc) {
-//					exc.printStackTrace();
-//				}
+
+
+//				    Comparator<Object> comparator = Collections.reverseOrder();
+//				    Collections.sort(selectedCells,comparator);
+			        Collections.sort(selectedCells);  
+				    System.out.println(selectedCells);
+//				    while (true) {
+//				    	int loop = 0;
+//				    	for (loop = 0; loop < selectedCells.size(); loop++) {
+//				    		if (Integer.parseInt(model.getValueAt(Integer.parseInt(selectedCells.get(loop)), 0).toString()) < Integer.parseInt(model.getValueAt(Integer.parseInt(selectedCells.get(loop)), 0).toString())) {
+//				    			
+//				    		}
+//				    		
+//				    		if (loop == selectedCells.size() - 1) {
+//				    			break;
+//				    		}
+//				    	}
+//				    	break;
+//				    }
+				    	
+		            print("===");
+		            for (int i = selectedCells.size() - 1; i > -1; i--) {
+		            	int cellIndex = 0;
+		            	String cellIndexString = "";
+		            	for (int j = 0; j < selectedCells.size(); j++) {
+		            		if (Integer.parseInt(selectedCells.get(j)) > cellIndex) {
+		            			cellIndex = Integer.parseInt(selectedCells.get(j));
+		            			cellIndexString = selectedCells.get(j);
+		            		}
+		            	}
+		            	selectedCells.remove(cellIndexString);
+
+					    System.out.println("cellIndexString " + cellIndexString);
+					    isRemoval = true;
+					    PreparedStatement preparedStmt = myConn.prepareStatement(query);
+		            	System.out.println("cellIndex " + cellIndex);
+		            	int foo;
+		            	try {
+		            	   foo = Integer.parseInt(cellIndexString);
+		            	}
+		            	catch (NumberFormatException er)
+		            	{
+		            	   foo = 0;
+		            	}
+					    System.out.println(foo);
+		            	preparedStmt.setInt (1, Integer.parseInt(model.getValueAt(foo, 0).toString()));
+		            	preparedStmt.executeUpdate();
+			            model.removeRow(foo);
+			            
+			            if (i == 0) {
+						    isRemoval = true;
+			            	preparedStmt.setInt (1, Integer.parseInt(model.getValueAt(Integer.parseInt(selectedCells.get(0)), 0).toString()));
+			            	preparedStmt.executeUpdate();
+				            model.removeRow(foo);
+			            }
+		            	print("===");
+		            }
+
+	            
+					// force call last
+				    myConn.close();
+				} catch (Exception exc) {
+					System.out.println(exc);
+					exc.printStackTrace();
+				}
 			}
 		});
 		
 	    jt.getModel().addTableModelListener(new TableModelListener(){
 			@Override
 			public void tableChanged(TableModelEvent e) {
-				
-				if (isAddition) {
+				print("select");
+				if (isAddition || isRemoval) {
+					print("reset");
 					isAddition = false;
+					isRemoval = false;
 				} else {
+					print("is updating");
 					// TODO Auto-generated method stub
 			        int row = e.getFirstRow();
 			        int column = e.getColumn();
