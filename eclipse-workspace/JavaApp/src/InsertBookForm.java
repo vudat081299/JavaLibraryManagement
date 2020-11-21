@@ -1,10 +1,13 @@
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -59,7 +62,10 @@ public class InsertBookForm extends JDialog {
 
 	JTextField searchInput;
 	JButton searchButton;
-	
+	JButton addBookIntoCartButton;
+	JButton comfirmBorrowButton;
+
+	JLabel errorLabel;
 	JLabel titleTable;
 	JScrollPane sp;
 	JTable jt;
@@ -72,10 +78,11 @@ public class InsertBookForm extends JDialog {
     
 	DefaultTableModel model;
 	int countRow = 0; // total row of table 
+	int countSelectedBook = 0;
 	
 	
 	// info of DB
-	String listColumn[] = {"id", "name", "type", "author", "publisher", "publishedDate", "dataType"}; // list column of DB
+	String listColumn[] = {"id", "name", "type", "author", "publisher", "publishedDate", "dataType", "state"}; // list column of DB
 	String url;
 	String username;
 	String password;
@@ -87,11 +94,15 @@ public class InsertBookForm extends JDialog {
 	
 	boolean isAddition;
 	boolean isRemoval;
+	boolean isSelectedBook;
 	String insertQuery;
 	String removeQuery;
 	String selectAllQuery;
 	
 	public InsertBookForm() {
+
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		setTitle("Quản lý đầu sách thư viện");
 		// initializers - not for array constants
 
 		url = "jdbc:mysql://localhost:3306/";
@@ -115,7 +126,6 @@ public class InsertBookForm extends JDialog {
 			@Override
 			public void keyPressed(KeyEvent e) {
 			    isRemoval = true;
-				System.out.println(e);
 				if(e.getKeyCode()==157){//check if user is pressing CTRL key
 					pressingCTRL=true;
 				}
@@ -133,13 +143,12 @@ public class InsertBookForm extends JDialog {
 		MouseListener tableMouseListener = new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-			    isRemoval = true;
-//				print("mouse click!");
-			    System.out.println("list cell selected" + selectedCells);
-				if(pressingCTRL == true){//check if user is pressing CTRL key
-					int row = jt.rowAtPoint(e.getPoint());//get mouse-selected row
-					String newEntry = "" + row;//{row,col}=selected cell
-					if(selectedCells.contains(newEntry)){
+				System.out.println("keyevent: " + e);
+				if (pressingCTRL == true) { //check if user is pressing CTRL key
+				    isRemoval = true;
+					int row = jt.rowAtPoint(e.getPoint()); //get mouse-selected row
+					String newEntry = "" + row; //{row,col}=selected cell
+					if (selectedCells.contains(newEntry)) {
 						//cell was already selected, deselect it
 						selectedCells.remove(newEntry);
 //						print("is contain!");
@@ -166,12 +175,10 @@ public class InsertBookForm extends JDialog {
 		addBookButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (!validate("")) {
-					print("----");
 					System.out.print(validate(""));
 					return;
 				}
 
-				print("-------");
 				try {
 					// 1. Get a connection to database
 					myConn = DriverManager.getConnection(url + tableName, username, password);
@@ -209,6 +216,11 @@ public class InsertBookForm extends JDialog {
 		
 		removeBookButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if (selectedCells.size() > 0) {
+					
+				} else {
+					return;
+				}
 
 				try {
 					// 1. Get a connection to database
@@ -226,7 +238,6 @@ public class InsertBookForm extends JDialog {
 //				    PreparedStatement preparedStmt = myConn.prepareStatement(query);
 				    
 				    // execute the preparedstatement
-				    isRemoval = true;
 //				    model.addRow(new Object[]{countRow, nameInput.getText(), typeInput.getText(), authorInput.getText(), 
 //				    		nxbInput.getText(), publisedhDateInput.getText(), dataTypeInput.getText()});	
 
@@ -234,7 +245,6 @@ public class InsertBookForm extends JDialog {
 //				    Comparator<Object> comparator = Collections.reverseOrder();
 //				    Collections.sort(selectedCells,comparator);
 			        Collections.sort(selectedCells);  
-				    System.out.println(selectedCells);
 //				    while (true) {
 //				    	int loop = 0;
 //				    	for (loop = 0; loop < selectedCells.size(); loop++) {
@@ -248,8 +258,6 @@ public class InsertBookForm extends JDialog {
 //				    	}
 //				    	break;
 //				    }
-				    	
-		            print("===");
 		            for (int i = selectedCells.size() - 1; i > -1; i--) {
 		            	int cellIndex = 0;
 		            	String cellIndexString = "";
@@ -260,11 +268,8 @@ public class InsertBookForm extends JDialog {
 		            		}
 		            	}
 		            	selectedCells.remove(cellIndexString);
-
-					    System.out.println("cellIndexString " + cellIndexString);
 					    isRemoval = true;
 					    PreparedStatement preparedStmt = myConn.prepareStatement(query);
-		            	System.out.println("cellIndex " + cellIndex);
 		            	int foo;
 		            	try {
 		            	   foo = Integer.parseInt(cellIndexString);
@@ -273,18 +278,24 @@ public class InsertBookForm extends JDialog {
 		            	{
 		            	   foo = 0;
 		            	}
-					    System.out.println(foo);
-		            	preparedStmt.setInt (1, Integer.parseInt(model.getValueAt(foo, 0).toString()));
-		            	preparedStmt.executeUpdate();
-			            model.removeRow(foo);
-			            
-			            if (i == 0) {
-						    isRemoval = true;
+		            	if (model.getValueAt(foo, 7) == null) {
+		            		
+		            	} else if (model.getValueAt(foo, 7).equals("Chọn")) {
+		            		countSelectedBook--;
+		                	comfirmBorrowButton.setText("Mượn (" + countSelectedBook + ")");
+		            	}
+			            if (i == 0 && selectedCells.size() > 0) {
 			            	preparedStmt.setInt (1, Integer.parseInt(model.getValueAt(Integer.parseInt(selectedCells.get(0)), 0).toString()));
 			            	preparedStmt.executeUpdate();
 				            model.removeRow(foo);
+			            	selectedCells.remove(selectedCells.get(0));
+						    isRemoval = false;
+			            } else {
+			            	preparedStmt.setInt (1, Integer.parseInt(model.getValueAt(foo, 0).toString()));
+			            	preparedStmt.executeUpdate();
+				            model.removeRow(foo);
 			            }
-		            	print("===");
+		            	print("---------");
 		            }
 
 	            
@@ -297,24 +308,72 @@ public class InsertBookForm extends JDialog {
 			}
 		});
 		
+
+		comfirmBorrowButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				RentManagement rentManagement = new RentManagement();
+				rentManagement.pack();
+				rentManagement.setBounds(230, 150, 1200, 800);
+				rentManagement.setVisible(true);
+			}
+		});
+		setLayout(null);
+
+		//
+		addBookIntoCartButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+            	int foo;
+            	String cellIndexString = "";
+				if (selectedCells.size() == 0) {
+					
+					return;
+				} else {
+		            for (int i = selectedCells.size() - 1; i > -1; i--) {
+
+		            	cellIndexString = selectedCells.get(i);
+		            	selectedCells.remove(cellIndexString);
+		            	
+		            	try {
+		            	   foo = Integer.parseInt(cellIndexString);
+		            	}
+		            	catch (NumberFormatException er)
+		            	{
+		            	   foo = 0;
+		            	}
+		            	
+						if (model.getValueAt(foo, 7) == null || model.getValueAt(foo, 7).equals("")) { 
+							countSelectedBook++;
+							isSelectedBook = true;
+							model.setValueAt("Chọn", foo, 7);
+			            	comfirmBorrowButton.setText("Mượn (" + countSelectedBook + ")");
+		            	}
+		            }
+				}
+				
+			}
+		});
+
 	    jt.getModel().addTableModelListener(new TableModelListener(){
 			@Override
 			public void tableChanged(TableModelEvent e) {
-				print("select");
-				if (isAddition || isRemoval) {
-					print("reset");
+            	print("---------");
+				System.out.println(e);
+				if (isAddition || isRemoval || isSelectedBook) {
+					print("can not edit row!");
 					isAddition = false;
 					isRemoval = false;
+					isSelectedBook = false;
 				} else {
-					print("is updating");
 					// TODO Auto-generated method stub
+					print("editting row!");
 			        int row = e.getFirstRow();
 			        int column = e.getColumn();
 			        if (column == 0) {
 			        	return;
 			        }
 			        
-			        String sqlupdate = "UPDATE Book SET " + listColumn[column] + " = '" + model.getValueAt(row, column) + "' WHERE id = " + ++row;
+			        String sqlupdate = "UPDATE Book SET " + listColumn[column] + " = '" + model.getValueAt(row, column) + "' WHERE id = " + model.getValueAt(row, 0);
+			        print(sqlupdate);
 					if(column != 0) {
 						try {
 							// 1. Get a connection to database
@@ -378,7 +437,8 @@ public class InsertBookForm extends JDialog {
 			    String e = myRs.getString("publisher");
 			    String f = myRs.getString("publishedDate");
 			    String g = myRs.getString("dataType");
-			    model.addRow(new Object[]{a, b, c, d, e, f ,g});
+			    String h = myRs.getString("state");
+			    model.addRow(new Object[]{a, b, c, d, e, f ,g, h});
 
 			}
 			countRow = model.getRowCount();
@@ -438,20 +498,37 @@ public class InsertBookForm extends JDialog {
 
 		// button
 		addBookButton = new JButton("Thêm đầu sách vào thư viện");
-		addBookButton.setBounds(825, 0, 200, 50);
+		addBookButton.setBounds(800, 0, 225, 50);
 		removeBookButton = new JButton("Xoá");
-		removeBookButton.setBounds(1025, 0, 60, 50);
+		removeBookButton.setBounds(1025, 0, 85, 50);
 		
 		//
 		searchButton = new JButton("Tìm kiếm ");
-		searchButton.setBounds(825, 50, 200, 50);
+		searchButton.setBounds(800, 50, 225, 50);
+		addBookIntoCartButton = new JButton("Thêm sách vào danh sách mượn");
+		addBookIntoCartButton.setBounds(800, 100, 225, 50);
+		comfirmBorrowButton = new JButton("Mượn (" + countSelectedBook + ")");
+		comfirmBorrowButton.setBounds(1025, 100, 85, 50);
 		
 		// 
+		
+		errorLabel = new JLabel("", SwingConstants.CENTER);
+		errorLabel.setBounds(10, 170, 1180, 50);
+		errorLabel.setForeground(Color.RED);
 		titleTable = new JLabel("Bảng danh sách các đầu sách trong thư viện");
 		titleTable.setBounds(10,-20,780,500);
-		model = new DefaultTableModel(new Object[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách"}, 0);
+		model = new DefaultTableModel(new Object[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách", "Trạng thái"}, 0);
 	    jt = new JTable(model);    
 	    jt.setBounds(10,250,1180,500); 
+	    jt.getColumnModel().getColumn(0).setPreferredWidth(20);
+	    jt.getColumnModel().getColumn(1).setPreferredWidth(120);
+	    jt.getColumnModel().getColumn(2).setPreferredWidth(60);
+	    jt.getColumnModel().getColumn(3).setPreferredWidth(120);
+	    jt.getColumnModel().getColumn(4).setPreferredWidth(20);
+	    jt.getColumnModel().getColumn(5).setPreferredWidth(20);
+	    jt.getColumnModel().getColumn(6).setPreferredWidth(20);
+	    jt.getColumnModel().getColumn(7).setPreferredWidth(20);
+	    jt.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 	    sp = new JScrollPane(jt); 
 	    sp.setBounds(10,250,1180,440);
 		
@@ -467,9 +544,14 @@ public class InsertBookForm extends JDialog {
 		add(publisedhDateInput);
 		add(dataType);
 		add(dataTypeInput);
-		add(searchButton);
+	
 		add(addBookButton); // button
 		add(removeBookButton);
+		add(searchButton);
+		add(addBookIntoCartButton);
+		add(comfirmBorrowButton);
+
+		add(errorLabel);   
 		add(titleTable);   
 	    add(sp); // scroll pane
 	    

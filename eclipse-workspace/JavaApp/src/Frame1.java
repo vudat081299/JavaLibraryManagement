@@ -71,7 +71,7 @@ public class Frame1 {
 	}
 	private void initLibraryManagementUI() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 750, 800);
+		frame.setBounds(455, 150, 750, 800);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setTitle(titleOfAppFrame);
 		
@@ -81,7 +81,7 @@ public class Frame1 {
 			public void actionPerformed(ActionEvent e) {
 				InsertBookForm week1 = new InsertBookForm();
 				week1.pack();
-				week1.setSize(1200, 800);
+				week1.setBounds(230, 150, 1200, 800);
 				week1.setVisible(true);
 			}
 		});
