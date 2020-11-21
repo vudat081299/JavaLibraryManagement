@@ -51,7 +51,7 @@ public class RentManagement extends JDialog {
 	JTable jt;
 	
 
-	DefaultTableModel model;
+	static DefaultTableModel selectedBookModel;
 	
 	
 	public RentManagement() {
@@ -75,14 +75,15 @@ public class RentManagement extends JDialog {
 		getContentPane().setLayout(null);
 	}
 	
-	void prepareData () {
+	static void prepareData () {
+		clearModel();
 //	    Object[] columnData = new Object[jt.getRowCount()];  // One entry for each row
 //	    Object[] rowData = new Object [jt.getRowCount()];
 	    for (int i = 0; i < InsertBookForm.model.getRowCount(); i++) {  // Loop through the rows
 	        // Record the 5th column value (index 4)
 //	    	stateText = (String) jt.getValueAt(i, 7);  
 
-        	if (InsertBookForm.model.getValueAt(i, 7) == null || InsertBookForm.model.getValueAt(i, 7).equals("Đã được mượn") || InsertBookForm.model.getValueAt(i,  7).equals("")) {
+        	if (InsertBookForm.model.getValueAt(i, 7) == null || InsertBookForm.model.getValueAt(i, 7).equals("Đã được mượn") || InsertBookForm.model.getValueAt(i, 7).equals("")) {
         		System.out.println("000000");
         	} else {
         		System.out.println("111111");
@@ -94,9 +95,17 @@ public class RentManagement extends JDialog {
 			    String f = (String) InsertBookForm.model.getValueAt(i, 5);
 			    String g = (String) InsertBookForm.model.getValueAt(i, 6);
 			    String h = (String) InsertBookForm.model.getValueAt(i, 7);
-        		model.addRow(new Object[]{a, b, c, d, e, f ,g ,h});	
+			    selectedBookModel.addRow(new Object[]{a, b, c, d, e, f ,g ,h});	
         	}
 	     }
+	}
+	
+	static void clearModel () {
+		if (selectedBookModel.getRowCount() > 0) {
+		    for (int i = selectedBookModel.getRowCount() - 1; i > -1; i--) {
+		    	selectedBookModel.removeRow(i);
+		    }
+		}
 	}
 	
 	void renderUIElement() {
@@ -142,9 +151,9 @@ public class RentManagement extends JDialog {
 		errorLabel.setForeground(Color.RED);
 		titleTable = new JLabel("Bảng danh sách các đầu sách đã chọn");
 		titleTable.setBounds(10,-20,780,500);
-		model = new DefaultTableModel(new Object[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách", "Trạng thái"}, 0);
+		selectedBookModel = new DefaultTableModel(new Object[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách", "Trạng thái"}, 0);
 //		model = cloneModel();
-	    jt = new JTable(model);    
+	    jt = new JTable(selectedBookModel);    
 	    jt.setBounds(10,250,1180,500); 
 	    jt.getColumnModel().getColumn(0).setPreferredWidth(20);
 	    jt.getColumnModel().getColumn(1).setPreferredWidth(120);
