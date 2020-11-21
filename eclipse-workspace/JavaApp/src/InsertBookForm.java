@@ -314,7 +314,6 @@ public class InsertBookForm extends JDialog {
 		comfirmBorrowButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RentManagement rentManagement = new RentManagement();
-				RentManagement.prepareData();
 				rentManagement.pack();
 				rentManagement.setBounds(0, 0, 1200, 800);
 				rentManagement.setVisible(true);
