@@ -82,7 +82,7 @@ public class RentManagement extends JDialog {
 	        // Record the 5th column value (index 4)
 //	    	stateText = (String) jt.getValueAt(i, 7);  
 
-        	if (InsertBookForm.model.getValueAt(i, 7) == null || InsertBookForm.model.getValueAt(i, 7).equals("Đã được mượn")) {
+        	if (InsertBookForm.model.getValueAt(i, 7) == null || InsertBookForm.model.getValueAt(i, 7).equals("Đã được mượn") || InsertBookForm.model.getValueAt(i,  7).equals("")) {
         		System.out.println("000000");
         	} else {
         		System.out.println("111111");
@@ -181,6 +181,7 @@ public class RentManagement extends JDialog {
 //	    renderer.setHorizontalAlignment(0);         
 //	    setVisible(true);    
 	}	
+	
 	DefaultTableModel cloneModel () {
 		return InsertBookForm.model;
 	}

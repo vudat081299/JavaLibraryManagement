@@ -62,8 +62,9 @@ public class InsertBookForm extends JDialog {
 
 	JTextField searchInput;
 	JButton searchButton;
-	JButton addBookIntoCartButton;
 	JButton comfirmBorrowButton;
+	JButton addBookIntoCartButton;
+	JButton removeBookFromCartButton;
 
 	JLabel errorLabel;
 	JLabel titleTable;
@@ -95,6 +96,7 @@ public class InsertBookForm extends JDialog {
 	boolean isAddition;
 	boolean isRemoval;
 	boolean isSelectedBook;
+	boolean isRemoveBookFromCart;
 	String insertQuery;
 	String removeQuery;
 	String selectAllQuery;
@@ -312,6 +314,7 @@ public class InsertBookForm extends JDialog {
 		comfirmBorrowButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RentManagement rentManagement = new RentManagement();
+//				RentManagement.prepareData();
 				rentManagement.pack();
 				rentManagement.setBounds(0, 0, 1200, 800);
 				rentManagement.setVisible(true);
@@ -355,17 +358,51 @@ public class InsertBookForm extends JDialog {
 				
 			}
 		});
+		
+		removeBookFromCartButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+	            for (int i = selectedCells.size() - 1; i > -1; i--) {
+	            	int cellIndex = 0;
+	            	String cellIndexString = "";
+	            	for (int j = 0; j < selectedCells.size(); j++) {
+	            		if (Integer.parseInt(selectedCells.get(j)) > cellIndex) {
+	            			cellIndex = Integer.parseInt(selectedCells.get(j));
+	            			cellIndexString = selectedCells.get(j);
+	            		}
+	            	}
+	            	selectedCells.remove(cellIndexString);
+	            	int foo;
+	            	try {
+	            	   foo = Integer.parseInt(cellIndexString);
+	            	}
+	            	catch (NumberFormatException er)
+	            	{
+	            	   foo = 0;
+	            	}
+	            	
+	            	if (model.getValueAt(foo, 7) == null || model.getValueAt(foo, 7).equals("")) {
+	            	} else if (model.getValueAt(foo, 7).equals("Chọn")) {
+	            		isRemoveBookFromCart = true;
+	            		countSelectedBook--;
+						model.setValueAt("", foo, 7);
+	                	comfirmBorrowButton.setText("Mượn (" + countSelectedBook + ")");
+	            	}
+	            }
+			}
+		});
 
 	    jt.getModel().addTableModelListener(new TableModelListener(){
 			@Override
 			public void tableChanged(TableModelEvent e) {
             	print("---------");
 				System.out.println(e);
-				if (isAddition || isRemoval || isSelectedBook) {
+				if (isAddition || isRemoval || isSelectedBook || isRemoveBookFromCart) {
 					print("can not edit row!");
 					isAddition = false;
 					isRemoval = false;
 					isSelectedBook = false;
+					isRemoveBookFromCart = false;
 				} else {
 					// TODO Auto-generated method stub
 					print("editting row!");
@@ -506,12 +543,14 @@ public class InsertBookForm extends JDialog {
 		removeBookButton.setBounds(1025, 0, 85, 50);
 		
 		//
-		searchButton = new JButton("Tìm kiếm ");
-		searchButton.setBounds(800, 50, 225, 50);
-		addBookIntoCartButton = new JButton("Thêm sách vào danh sách mượn");
+		searchButton = new JButton("Tìm kiếm");
+		searchButton.setBounds(800, 50, 155, 50);
+		comfirmBorrowButton = new JButton("Giỏ sách (" + countSelectedBook + ")");
+		comfirmBorrowButton.setBounds(955, 50, 155, 50);
+		addBookIntoCartButton = new JButton("Thêm sách vào giỏ sách");
 		addBookIntoCartButton.setBounds(800, 100, 225, 50);
-		comfirmBorrowButton = new JButton("Mượn (" + countSelectedBook + ")");
-		comfirmBorrowButton.setBounds(1025, 100, 85, 50);
+		removeBookFromCartButton = new JButton("Xoá");
+		removeBookFromCartButton.setBounds(1025, 100, 85, 50);
 		
 		// 
 		
@@ -552,8 +591,9 @@ public class InsertBookForm extends JDialog {
 		add(addBookButton); // button
 		add(removeBookButton);
 		add(searchButton);
-		add(addBookIntoCartButton);
 		add(comfirmBorrowButton);
+		add(addBookIntoCartButton);
+		add(removeBookFromCartButton);
 
 		add(errorLabel);   
 		add(titleTable);   
