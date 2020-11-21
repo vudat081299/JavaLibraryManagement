@@ -65,6 +65,7 @@ public class InsertBookForm extends JDialog {
 	JButton comfirmBorrowButton;
 	JButton addBookIntoCartButton;
 	JButton removeBookFromCartButton;
+	JButton returnBookButton;
 
 	JLabel errorLabel;
 	JLabel titleTable;
@@ -193,7 +194,7 @@ public class InsertBookForm extends JDialog {
 
 				    // create the mysql insert preparedstatement
 				    PreparedStatement preparedStmt = myConn.prepareStatement(query);
-				    preparedStmt.setInt    (1, ++countRow);
+				    preparedStmt.setInt    (1, nextCreatingIDBook());
 				    preparedStmt.setString (2, nameInput.getText());
 				    preparedStmt.setString (3, typeInput.getText());
 				    preparedStmt.setString (4, authorInput.getText());
@@ -205,7 +206,7 @@ public class InsertBookForm extends JDialog {
 				    System.out.println(preparedStmt);
 				    preparedStmt.execute();
 				    isAddition = true;
-				    model.addRow(new Object[]{countRow, nameInput.getText(), typeInput.getText(), authorInput.getText(), 
+				    model.addRow(new Object[]{nextCreatingIDBook(), nameInput.getText(), typeInput.getText(), authorInput.getText(), 
 				    		nxbInput.getText(), publisedhDateInput.getText(), dataTypeInput.getText()});	
 
 					// force call last
@@ -333,7 +334,7 @@ public class InsertBookForm extends JDialog {
 		            for (int i = selectedCells.size() - 1; i > -1; i--) {
 
 		            	cellIndexString = selectedCells.get(i);
-		            	selectedCells.remove(cellIndexString);
+//		            	selectedCells.remove(cellIndexString);
 		            	
 		            	try {
 		            	   foo = Integer.parseInt(cellIndexString);
@@ -350,7 +351,7 @@ public class InsertBookForm extends JDialog {
 //							listSelectedItem.addRow(model.getDataVector().elementAt(0));
 							print("++++");
 //							System.out.println(listSelectedItem.getValueAt(0, 0));
-			            	comfirmBorrowButton.setText("Mượn (" + countSelectedBook + ")");
+			            	comfirmBorrowButton.setText("Giỏ sách (" + countSelectedBook + ")");
 		            	}
 		            }
 				}
@@ -364,13 +365,13 @@ public class InsertBookForm extends JDialog {
 	            for (int i = selectedCells.size() - 1; i > -1; i--) {
 	            	int cellIndex = 0;
 	            	String cellIndexString = "";
-	            	for (int j = 0; j < selectedCells.size(); j++) {
-	            		if (Integer.parseInt(selectedCells.get(j)) > cellIndex) {
-	            			cellIndex = Integer.parseInt(selectedCells.get(j));
-	            			cellIndexString = selectedCells.get(j);
-	            		}
-	            	}
-	            	selectedCells.remove(cellIndexString);
+//	            	for (int j = 0; j < selectedCells.size(); j++) {
+//	            		if (Integer.parseInt(selectedCells.get(j)) > cellIndex) {
+	            			cellIndex = Integer.parseInt(selectedCells.get(i));
+	            			cellIndexString = selectedCells.get(i);
+//	            		}
+//	            	}
+//	            	selectedCells.remove(cellIndexString);
 	            	int foo;
 	            	try {
 	            	   foo = Integer.parseInt(cellIndexString);
@@ -385,7 +386,7 @@ public class InsertBookForm extends JDialog {
 	            		isRemoveBookFromCart = true;
 	            		countSelectedBook--;
 						model.setValueAt("", foo, 7);
-	                	comfirmBorrowButton.setText("Mượn (" + countSelectedBook + ")");
+	                	comfirmBorrowButton.setText("Giỏ sách (" + countSelectedBook + ")");
 	            	}
 	            }
 			}
@@ -435,9 +436,16 @@ public class InsertBookForm extends JDialog {
         });
 	}
 	
-	
+
 
 	// methods
+	int nextCreatingIDBook () {
+		if (model.getRowCount() == 0) {
+			return 1;
+		}
+		return Integer.parseInt(model.getValueAt(model.getRowCount() - 1, 0).toString()) + 1;
+	}
+	
 	public boolean validate(String string) {
 	    if (nameInput.getText().length() == 0 || 
 	    		typeInput.getText().length() == 0 || 
@@ -543,12 +551,16 @@ public class InsertBookForm extends JDialog {
 		
 		//
 		searchButton = new JButton("Tìm kiếm");
-		searchButton.setBounds(800, 50, 155, 50);
+		searchButton.setBounds(800, 50, 103, 50);
 		comfirmBorrowButton = new JButton("Giỏ sách (" + countSelectedBook + ")");
-		comfirmBorrowButton.setBounds(955, 50, 155, 50);
+		comfirmBorrowButton.setBounds(903, 50, 103, 50);
+		returnBookButton = new JButton("Trả sách");
+		returnBookButton.setBounds(1006, 50, 104, 50);
+		
+		//
 		addBookIntoCartButton = new JButton("Thêm sách vào giỏ sách");
 		addBookIntoCartButton.setBounds(800, 100, 225, 50);
-		removeBookFromCartButton = new JButton("Xoá");
+		removeBookFromCartButton = new JButton("Bỏ chọn");
 		removeBookFromCartButton.setBounds(1025, 100, 85, 50);
 		
 		// 
@@ -589,8 +601,11 @@ public class InsertBookForm extends JDialog {
 	
 		add(addBookButton); // button
 		add(removeBookButton);
+		
 		add(searchButton);
 		add(comfirmBorrowButton);
+		add(returnBookButton);
+		
 		add(addBookIntoCartButton);
 		add(removeBookFromCartButton);
 
