@@ -31,9 +31,9 @@ import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 import java.util.Vector;
 //import java.util.*; 
-import java.util.Arrays; 
+//import java.util.Arrays; 
 import java.util.Collections;
-import java.util.Comparator; 
+//import java.util.Comparator; 
 
 public class InsertBookForm extends JDialog {
 /**
@@ -75,8 +75,8 @@ public class InsertBookForm extends JDialog {
 //	Vector<int[]> selectedCells = new Vector<int[]>();
 //	Vector<int> selectedCells = new Vector<int>();
     Vector<String> selectedCells = new Vector<String>();
-    
-	DefaultTableModel model;
+
+	static DefaultTableModel model;
 	int countRow = 0; // total row of table 
 	int countSelectedBook = 0;
 	
@@ -313,7 +313,7 @@ public class InsertBookForm extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				RentManagement rentManagement = new RentManagement();
 				rentManagement.pack();
-				rentManagement.setBounds(230, 150, 1200, 800);
+				rentManagement.setBounds(0, 0, 1200, 800);
 				rentManagement.setVisible(true);
 			}
 		});
@@ -345,6 +345,9 @@ public class InsertBookForm extends JDialog {
 							countSelectedBook++;
 							isSelectedBook = true;
 							model.setValueAt("Chọn", foo, 7);
+//							listSelectedItem.addRow(model.getDataVector().elementAt(0));
+							print("++++");
+//							System.out.println(listSelectedItem.getValueAt(0, 0));
 			            	comfirmBorrowButton.setText("Mượn (" + countSelectedBook + ")");
 		            	}
 		            }
@@ -518,6 +521,7 @@ public class InsertBookForm extends JDialog {
 		titleTable = new JLabel("Bảng danh sách các đầu sách trong thư viện");
 		titleTable.setBounds(10,-20,780,500);
 		model = new DefaultTableModel(new Object[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách", "Trạng thái"}, 0);
+//		listSelectedItem = new DefaultTableModel(new Object[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách", "Trạng thái"}, 0);
 	    jt = new JTable(model);    
 	    jt.setBounds(10,250,1180,500); 
 	    jt.getColumnModel().getColumn(0).setPreferredWidth(20);
