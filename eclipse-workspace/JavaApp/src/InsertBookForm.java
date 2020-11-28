@@ -71,6 +71,7 @@ public class InsertBookForm extends JDialog {
 	JLabel titleTable;
 	JScrollPane sp;
 	JTable jt;
+	JLabel ownerMark;
 	
 	// init default data for variables, definitions
 	boolean pressingCTRL=false;//flag, if pressing CTRL it is true, otherwise it is false.
@@ -585,7 +586,10 @@ public class InsertBookForm extends JDialog {
 	    jt.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 	    sp = new JScrollPane(jt); 
 	    sp.setBounds(10,250,1180,440);
-		
+
+	    ownerMark = new JLabel("Vũ Quý Đạt - MSSV: 20176082 - Lớp: Vuwit16b");
+		ownerMark.setBounds(10,700,1180,30);
+	    
 		add(name);
 		add(nameInput);
 		add(type);
@@ -612,6 +616,7 @@ public class InsertBookForm extends JDialog {
 		add(errorLabel);   
 		add(titleTable);   
 	    add(sp); // scroll pane
+	    add(ownerMark);
 	    
 	    // set centre header for table
 //	    DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) jt.getTableHeader().getDefaultRenderer();

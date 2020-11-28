@@ -71,7 +71,7 @@ public class Frame1 {
 	}
 	private void initLibraryManagementUI() {
 		frame = new JFrame();
-		frame.setBounds(455, 150, 750, 800);
+		frame.setBounds(455, 150, 750, 560);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setTitle(titleOfAppFrame);
 		
@@ -112,6 +112,12 @@ public class Frame1 {
 			}
 		});
 		frame.getContentPane().add(staffManagementButton);
+		
+		JLabel ownerMark = new JLabel();
+	    ownerMark = new JLabel("Vũ Quý Đạt - MSSV: 20176082 - Lớp: Vuwit16b");
+		ownerMark.setBounds(10, 500, 750, 30);
+		frame.getContentPane().add(ownerMark);
+		
 	}
 	
 
