@@ -15,36 +15,40 @@ public class Frame1 {
 	private JFrame frame;
 	static int week = 0;
 	boolean renderLibraryUI = true;
+	int app = 2; // 0 is homework | 1 is Library Management | 2 is Hotel Management
 	String titleOfAppFrame = "Quản lý thư viện";
 	String titleOfBookManagementFrame = "Quản lý đầu sách";
 	String titleOfReaderManagementFrame = "Quản lý độc giả";
 	String titleOfStaffManagementFrame = "Quản lý nhân viên";
+	
+	String titleRoomManagement = "Quản lý phòng khách sạn";
+	String titleBookingRoomManagement = "Quản lý đặt phòng ";
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		Connection myConn = null;
-		Statement myStmt = null;
-		ResultSet myRs = null;
-		
-		try {
-			// 1. Get a connection to database
-			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/LibraryManagementDB", "root" , "Iviundhacthi8987m");
-			
-			// 2. Create a statement
-			myStmt = myConn.createStatement();
-			
-			// 3. Execute SQL query
-			myRs = myStmt.executeQuery("select * from Book");
-			
-			// 4. Process the result set
-			while (myRs.next()) {
-				System.out.println(myRs.getString("name") + ", " + myRs.getString("author"));
-			}
-		}
-		catch (Exception exc) {
-			exc.printStackTrace();
-		}
+//		Connection myConn = null;
+//		Statement myStmt = null;
+//		ResultSet myRs = null;
+//		
+//		try {
+//			// 1. Get a connection to database
+//			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/LibraryManagementDB", "root" , "Iviundhacthi8987m");
+//			
+//			// 2. Create a statement
+//			myStmt = myConn.createStatement();
+//			
+//			// 3. Execute SQL query
+//			myRs = myStmt.executeQuery("select * from Book");
+//			
+//			// 4. Process the result set
+//			while (myRs.next()) {
+//				System.out.println(myRs.getString("name") + ", " + myRs.getString("author"));
+//			}
+//		}
+//		catch (Exception exc) {
+//			exc.printStackTrace();
+//		}
 
 		// uncomment block below to run UI execute 50 exercise Java
 		EventQueue.invokeLater(new Runnable() {
@@ -63,12 +67,52 @@ public class Frame1 {
 	 * Create the application.
 	 */
 	public Frame1() {
-		if (!renderLibraryUI) {
+		if (app == 0) {
 			initialize();
-		} else {
+		} else if (app == 1) {
 			initLibraryManagementUI();
+		} else if (app == 2) {
+			initHotelManagementProject();
 		}
 	}
+	
+	private void initHotelManagementProject () {
+		frame = new JFrame();
+		frame.setBounds(455, 150, 750, 560);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setTitle(titleOfAppFrame);
+
+		JButton titleRoomManagementButton = new JButton(titleRoomManagement);
+		titleRoomManagementButton.setBounds(50, 50, 300, 200);
+		titleRoomManagementButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				RoomManagement week1 = new RoomManagement();
+				week1.pack();
+				week1.setBounds(230, 150, 1200, 800);
+				week1.setVisible(true);
+			}
+		});
+		frame.getContentPane().setLayout(null);
+		frame.getContentPane().add(titleRoomManagementButton);
+		
+		JButton titleBookingRoomManagementButton = new JButton(titleBookingRoomManagement);
+		titleBookingRoomManagementButton.setBounds(400, 50, 300, 200);
+		titleBookingRoomManagementButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				RoomManagement week1 = new RoomManagement();
+				week1.pack();
+				week1.setSize(800, 800);
+				week1.setVisible(true);
+			}
+		});
+		frame.getContentPane().add(titleBookingRoomManagementButton);
+		
+		JLabel ownerMark = new JLabel();
+	    ownerMark = new JLabel("Vũ Quý Đạt - MSSV: 20176082 - Lớp: Vuwit16b");
+		ownerMark.setBounds(10, 500, 750, 30);
+		frame.getContentPane().add(ownerMark);
+	}
+	
 	private void initLibraryManagementUI() {
 		frame = new JFrame();
 		frame.setBounds(455, 150, 750, 560);
