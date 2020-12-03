@@ -58,7 +58,7 @@ public class RentManagement extends JDialog {
 		
 
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setTitle("Quản lý mượn trả ");
+		setTitle("Quản lý mượn trả");
 		// initializers - not for array constants
 		
 		// force call 
@@ -84,7 +84,7 @@ public class RentManagement extends JDialog {
 
         	if (InsertBookForm.model.getValueAt(i, 7) == null || InsertBookForm.model.getValueAt(i, 7).equals("Đã được mượn") || InsertBookForm.model.getValueAt(i,  7).equals("")) {
         		System.out.println("000000");
-        	} else {
+        	} else if (InsertBookForm.model.getValueAt(i, 7).equals("Chọn")) {
         		System.out.println("111111");
 			    int a = Integer.parseInt(InsertBookForm.model.getValueAt(i, 0).toString());
 			    String b = (String) InsertBookForm.model.getValueAt(i, 1);

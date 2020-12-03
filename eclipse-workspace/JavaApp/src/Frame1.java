@@ -15,12 +15,13 @@ public class Frame1 {
 	private JFrame frame;
 	static int week = 0;
 	boolean renderLibraryUI = true;
-	int app = 2; // 0 is homework | 1 is Library Management | 2 is Hotel Management
+	int app = 1; // 0 is homework | 1 is Library Management | 2 is Hotel Management
 	String titleOfAppFrame = "Quản lý thư viện";
 	String titleOfBookManagementFrame = "Quản lý đầu sách";
 	String titleOfReaderManagementFrame = "Quản lý độc giả";
-	String titleOfStaffManagementFrame = "Quản lý nhân viên";
+	String titleOfRentingBookFrame = "Quản lý mượn/trả sách";
 	
+	String titleHotelManagement = "Quản lý khách sạn";
 	String titleRoomManagement = "Quản lý phòng khách sạn";
 	String titleBookingRoomManagement = "Quản lý đặt phòng ";
 	/**
@@ -80,11 +81,11 @@ public class Frame1 {
 		frame = new JFrame();
 		frame.setBounds(455, 150, 750, 560);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setTitle(titleOfAppFrame);
+		frame.setTitle(titleHotelManagement);
 
-		JButton titleRoomManagementButton = new JButton(titleRoomManagement);
-		titleRoomManagementButton.setBounds(50, 50, 300, 200);
-		titleRoomManagementButton.addActionListener(new ActionListener() {
+		JButton roomManagementButton = new JButton(titleRoomManagement);
+		roomManagementButton.setBounds(50, 50, 300, 200);
+		roomManagementButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RoomManagement week1 = new RoomManagement();
 				week1.pack();
@@ -93,11 +94,11 @@ public class Frame1 {
 			}
 		});
 		frame.getContentPane().setLayout(null);
-		frame.getContentPane().add(titleRoomManagementButton);
+		frame.getContentPane().add(roomManagementButton);
 		
-		JButton titleBookingRoomManagementButton = new JButton(titleBookingRoomManagement);
-		titleBookingRoomManagementButton.setBounds(400, 50, 300, 200);
-		titleBookingRoomManagementButton.addActionListener(new ActionListener() {
+		JButton bookingRoomManagementButton = new JButton(titleBookingRoomManagement);
+		bookingRoomManagementButton.setBounds(400, 50, 300, 200);
+		bookingRoomManagementButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RoomManagement week1 = new RoomManagement();
 				week1.pack();
@@ -105,7 +106,7 @@ public class Frame1 {
 				week1.setVisible(true);
 			}
 		});
-		frame.getContentPane().add(titleBookingRoomManagementButton);
+		frame.getContentPane().add(bookingRoomManagementButton);
 		
 		JLabel ownerMark = new JLabel();
 	    ownerMark = new JLabel("Vũ Quý Đạt - MSSV: 20176082 - Lớp: Vuwit16b");
@@ -139,15 +140,15 @@ public class Frame1 {
 			public void actionPerformed(ActionEvent e) {
 				InsertReader week1 = new InsertReader();
 				week1.pack();
-				week1.setSize(800, 800);
+				week1.setSize(1400, 800);
 				week1.setVisible(true);
 			}
 		});
 		frame.getContentPane().add(insertReaderButton);
 
-		JButton staffManagementButton = new JButton(titleOfStaffManagementFrame);
-		staffManagementButton.setBounds(50, 300, 300, 200);
-		staffManagementButton.addActionListener(new ActionListener() {
+		JButton rentingManagementButton = new JButton(titleOfRentingBookFrame);
+		rentingManagementButton.setBounds(50, 300, 300, 200);
+		rentingManagementButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				StaffManagement week1 = new StaffManagement();
 				week1.pack();
@@ -155,7 +156,7 @@ public class Frame1 {
 				week1.setVisible(true);
 			}
 		});
-		frame.getContentPane().add(staffManagementButton);
+		frame.getContentPane().add(rentingManagementButton);
 		
 		JLabel ownerMark = new JLabel();
 	    ownerMark = new JLabel("Vũ Quý Đạt - MSSV: 20176082 - Lớp: Vuwit16b");
