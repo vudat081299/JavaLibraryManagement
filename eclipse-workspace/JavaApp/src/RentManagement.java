@@ -2,7 +2,11 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Arrays; 
 import java.util.ArrayList; 
 import java.util.Collections; 
@@ -41,7 +45,7 @@ public class RentManagement extends JDialog {
 	JTextField amountInput;
 
 	JTextField searchInput;
-	JButton searchButton;
+	JButton confirmBorrow;
 	JButton removeBook;
 	JButton removeAll;
 	
@@ -52,10 +56,37 @@ public class RentManagement extends JDialog {
 	
 
 	DefaultTableModel model;
+
+	Connection myConn = null;
+	Statement myStmt = null;
+	ResultSet myRs = null;
 	
+	DefaultTableModel reader = new DefaultTableModel(new String[]{"Mã độc giả"}, 0);
+	
+	String url;
+	String username;
+	String password;
+	String tableName;
+	boolean isAddition;
+	boolean isRemoval;
+	boolean isSelectedBook;
+	boolean isRemoveBookFromCart;
+	String insertQuery;
+	String removeQuery;
+	String selectAllQuery;
 	
 	public RentManagement() {
-		
+
+		url = "jdbc:mysql://localhost:3306/";
+		username = "root";
+		password = "Iviundhacthi8987m";
+		tableName = "LibraryManagementDB";
+		isAddition = false;
+
+		insertQuery = "insert into HireBookManagament (giveBackIntentDate, borrowedDate, bookId, readerId)"
+					+ " values (?, ?, ?, ?)";
+		removeQuery = "DELETE FROM HireBookManagament WHERE id = ?";
+		selectAllQuery = "select * from HireBookManagament";
 
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setTitle("Quản lý mượn trả");
@@ -65,6 +96,85 @@ public class RentManagement extends JDialog {
 		prerequisiteSetting();
 		renderUIElement();
 		prepareData();
+		loadDataReader();
+
+		confirmBorrow.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+			    System.out.println("-----");
+				for (int i = reader.getRowCount() - 1; i > -1 ; i--) {
+					if (((String) reader.getValueAt(i, 0)).equals(readerIDInput.getText())) {
+
+					    System.out.println("--+++---");
+						try {
+							// 1. Get a connection to database
+							myConn = DriverManager.getConnection(url + tableName, username, password);
+							
+							// 2. Create a statement
+							myStmt = myConn.createStatement();
+							
+							for (int j = 0; j < model.getRowCount(); j++) {
+								// the mysql insert statement
+							    String query = insertQuery;
+							    System.out.println("--+++---" + j);
+							    // create the mysql insert preparedstatement
+							    PreparedStatement preparedStmt = myConn.prepareStatement(query);
+							    preparedStmt.setString (1, dateReturnBackInput.getText());
+							    preparedStmt.setString (2, dateBorrowInput.getText());
+							    preparedStmt.setString (3, model.getValueAt(j, 0).toString());
+							    preparedStmt.setString (4, readerIDInput.getText());
+				
+							    // execute the preparedstatement
+							    System.out.println(preparedStmt);
+							    PreparedStatement addBorrowBookForm = myConn.prepareStatement("UPDATE Book SET state = '" + 
+							    readerIDInput.getText() + "' WHERE id = " + model.getValueAt(j, 0));
+
+							    System.out.println(addBorrowBookForm);
+							    preparedStmt.execute();
+							    addBorrowBookForm.execute();
+							    isAddition = true;
+							    model.setValueAt(readerIDInput.getText(), j, 7);
+							}// force call last
+						    myConn.close();
+						} catch (Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+				}
+//				if (!validate("")) {
+//					System.out.print(validate(""));
+//					return;
+//				}
+				
+			}
+		});
+	}
+	
+	void loadDataReader() {
+//		model = null;
+//		model = new DefaultTableModel(new String[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách"}, 0);
+		try {
+			// 1. Get a connection to database
+			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/LibraryManagementDB", "root" , "Iviundhacthi8987m");
+			
+			// 2. Create a statement
+			myStmt = myConn.createStatement();
+			
+			// 3. Execute SQL query
+			myRs = myStmt.executeQuery("select * from Reader");
+			
+			// 4. Process the result set
+			while (myRs.next()) {
+			    String a = myRs.getString("id");
+			    reader.addRow(new Object[]{a});
+
+			}
+
+            myConn.close();
+		}
+		catch (Exception exc) {
+			exc.printStackTrace();
+		}
 	}
 
 	// prerequisite setting for this dialog type view
@@ -101,7 +211,7 @@ public class RentManagement extends JDialog {
 	
 	void renderUIElement() {
 
-		formTitle = new JLabel("From nhập thông tin mượn sách");
+		formTitle = new JLabel("Form nhập thông tin mượn sách");
 		formTitle.setBounds(10, 0, 1180, 50);
 		//
 		readerID = new JLabel("Mã độc giả");
@@ -117,19 +227,13 @@ public class RentManagement extends JDialog {
 
 		//
 		dateReturnBack = new JLabel("Ngày hẹn trả");
-		dateReturnBack.setBounds(400, 50, 100, 50);
+		dateReturnBack.setBounds(400, 100, 100, 50);
 		dateReturnBackInput = new JTextField("", 5);
-		dateReturnBackInput.setBounds(510, 50, 200, 50);
-
-		//
-		amount = new JLabel("Số lượng cuốn");
-		amount.setBounds(400, 100, 100, 50);
-		amountInput = new JTextField("", 5);
-		amountInput.setBounds(510, 100, 200, 50);
+		dateReturnBackInput.setBounds(510, 100, 200, 50);
 		
 		//
-		searchButton = new JButton("Xác nhận mượn sách");
-		searchButton.setBounds(800, 50, 225, 50);
+		confirmBorrow = new JButton("Xác nhận mượn sách");
+		confirmBorrow.setBounds(800, 50, 225, 50);
 		removeBook = new JButton("Xoá");
 		removeBook.setBounds(1025, 50, 85, 50);
 		removeAll = new JButton("Huỷ mượn sách");
@@ -165,10 +269,8 @@ public class RentManagement extends JDialog {
 		add(dateBorrowInput);
 		add(dateReturnBack);
 		add(dateReturnBackInput);
-		add(amount);
-		add(amountInput);
 	
-		add(searchButton); // button
+		add(confirmBorrow); // button
 		add(removeBook);
 		add(removeAll);
 
