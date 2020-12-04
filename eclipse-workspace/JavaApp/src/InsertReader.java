@@ -103,7 +103,8 @@ public class InsertReader extends JDialog {
 	JTable jt;
 	// init default data for variables, definitions
 	boolean pressingCTRL=false;//flag, if pressing CTRL it is true, otherwise it is false.
-	
+
+	JLabel ownerMark;
 	//
 	
 	// load data table
@@ -146,6 +147,7 @@ public class InsertReader extends JDialog {
 	
 	public InsertReader() {
 
+		setTitle("Quản lý độc giả");
 		// Table mouse and keypressed listener
 		tableKeyListener = (KeyListener) new KeyAdapter() {
 			@Override
@@ -567,6 +569,11 @@ public class InsertReader extends JDialog {
 
 		add(searchButton);
 		add(doneSearchButton);
+		
+
+	    ownerMark = new JLabel("Vũ Quý Đạt - MSSV: 20176082 - Lớp: Vuwit16b");
+		ownerMark.setBounds(10,740,1180,30);
+		add(ownerMark);
 	}
 
 	String getSearchText() {

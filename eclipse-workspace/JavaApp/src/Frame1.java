@@ -152,7 +152,7 @@ public class Frame1 {
 			public void actionPerformed(ActionEvent e) {
 				StaffManagement week1 = new StaffManagement();
 				week1.pack();
-				week1.setSize(800, 800);
+				week1.setSize(1200, 800);
 				week1.setVisible(true);
 			}
 		});

@@ -65,7 +65,7 @@ public class InsertBookForm extends JDialog {
 	JButton comfirmBorrowButton;
 	JButton addBookIntoCartButton;
 	JButton removeBookFromCartButton;
-	JButton returnBookButton;
+	JButton doneSearchButton;
 
 	JLabel errorLabel;
 	JLabel titleTable;
@@ -82,6 +82,7 @@ public class InsertBookForm extends JDialog {
 	static DefaultTableModel model;
 	int countRow = 0; // total row of table 
 	int countSelectedBook = 0;
+	String searchField;
 	
 	
 	// info of DB
@@ -99,6 +100,7 @@ public class InsertBookForm extends JDialog {
 	boolean isRemoval;
 	boolean isSelectedBook;
 	boolean isRemoveBookFromCart;
+	boolean isSearching;
 	String insertQuery;
 	String removeQuery;
 	String selectAllQuery;
@@ -311,7 +313,60 @@ public class InsertBookForm extends JDialog {
 				}
 			}
 		});
-		
+
+		doneSearchButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (int i = model.getRowCount() - 1; i > -1 ; i--) {
+					isSearching = true;
+					model.removeRow(i);
+				}
+				loadDataFromDB();
+			}
+		});
+
+		searchButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (int i = model.getRowCount() - 1; i > -1 ; i--) {
+					isSearching = true;
+					model.removeRow(i);
+				}
+
+				try {
+					// 1. Get a connection to database
+					myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/LibraryManagementDB", "root" , "Iviundhacthi8987m");
+					
+					// 2. Create a statement
+					myStmt = myConn.createStatement();
+					getSearchText();
+					// the mysql insert statement
+				    String query = "SELECT * FROM Book WHERE " + searchField + " LIKE " + getSearchText();
+
+					System.out.println(query);
+					// 3. Execute SQL query
+					myRs = myStmt.executeQuery("select * from Book WHERE " + searchField + " LIKE '" + getSearchText() + "'");// 4. Process the result set
+					while (myRs.next()) {
+						System.out.println(myRs.getString("name") + ", " + myRs.getString("name"));
+						isSearching = true;
+					    String a = myRs.getString("id");
+					    String b = myRs.getString("name");
+					    String c = myRs.getString("type");
+					    String d = myRs.getString("author");
+					    String ee = myRs.getString("publisher");
+					    String f = myRs.getString("publishedDate");
+					    String g = myRs.getString("dataType");
+					    String h = myRs.getString("state");
+					    model.addRow(new Object[]{a, b, c, d, ee, f, g, h});
+
+					}
+					countRow = model.getRowCount();
+
+		            myConn.close();
+				} catch (Exception exc) {
+					exc.printStackTrace();
+				}
+			}
+		});
+
 
 		comfirmBorrowButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -398,12 +453,13 @@ public class InsertBookForm extends JDialog {
 			public void tableChanged(TableModelEvent e) {
             	print("---------");
 				System.out.println(e);
-				if (isAddition || isRemoval || isSelectedBook || isRemoveBookFromCart) {
+				if (isAddition || isRemoval || isSelectedBook || isRemoveBookFromCart || isSearching) {
 					print("can not edit row!");
 					isAddition = false;
 					isRemoval = false;
 					isSelectedBook = false;
 					isRemoveBookFromCart = false;
+					isSearching = false;
 				} else {
 					// TODO Auto-generated method stub
 					print("editting row!");
@@ -440,6 +496,29 @@ public class InsertBookForm extends JDialog {
 
 
 	// methods
+	String getSearchText() {
+		if (nameInput.getText() != null && !nameInput.getText().contentEquals("")) {
+			searchField = "name";
+			return nameInput.getText();
+		} else if (typeInput.getText() != null && !typeInput.getText().contentEquals("")) {
+			searchField = "type";
+			return typeInput.getText();
+		} else if (authorInput.getText() != null && !authorInput.getText().contentEquals("")) {
+			searchField = "author";
+			return authorInput.getText();
+		} else if (nxbInput.getText() != null && !nxbInput.getText().contentEquals("")) {
+			searchField = "publisher";
+			return nxbInput.getText();
+		} else if (publisedhDateInput.getText() != null && !publisedhDateInput.getText().contentEquals("")) {
+			searchField = "publishedDate";
+			return publisedhDateInput.getText();
+		} else if (dataTypeInput.getText() != null && !dataTypeInput.getText().contentEquals("")) {
+			searchField = "dataType";
+			return dataTypeInput.getText();
+		}
+		return "";
+	}
+	
 	int nextCreatingIDBook () {
 		if (model.getRowCount() == 0) {
 			return 1;
@@ -486,6 +565,7 @@ public class InsertBookForm extends JDialog {
 			    String f = myRs.getString("publishedDate");
 			    String g = myRs.getString("dataType");
 			    String h = myRs.getString("state");
+			    isSearching = true;
 			    model.addRow(new Object[]{a, b, c, d, e, f ,g, h});
 
 			}
@@ -552,11 +632,11 @@ public class InsertBookForm extends JDialog {
 		
 		//
 		searchButton = new JButton("Tìm kiếm");
-		searchButton.setBounds(800, 50, 103, 50);
+		searchButton.setBounds(800, 50, 90, 50);
 		comfirmBorrowButton = new JButton("Giỏ sách (" + countSelectedBook + ")");
-		comfirmBorrowButton.setBounds(903, 50, 103, 50);
-		returnBookButton = new JButton("Trả sách");
-		returnBookButton.setBounds(1006, 50, 104, 50);
+		comfirmBorrowButton.setBounds(1006, 50, 104, 50);
+		doneSearchButton = new JButton("Tìm kiếm xong");
+		doneSearchButton.setBounds(890, 50, 116, 50);
 		
 		//
 		addBookIntoCartButton = new JButton("Thêm sách vào giỏ sách");
@@ -608,7 +688,7 @@ public class InsertBookForm extends JDialog {
 		
 		add(searchButton);
 		add(comfirmBorrowButton);
-		add(returnBookButton);
+		add(doneSearchButton);
 		
 		add(addBookIntoCartButton);
 		add(removeBookFromCartButton);

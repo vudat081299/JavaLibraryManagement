@@ -2,6 +2,9 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -23,6 +26,9 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import java.util.Random;
+import java.util.Vector;
+
+import javax.swing.JOptionPane;
 
 public class RentManagement extends JDialog {
 	/**
@@ -57,6 +63,8 @@ public class RentManagement extends JDialog {
 
 	DefaultTableModel model;
 
+    Vector<String> selectedCells = new Vector<String>();
+
 	Connection myConn = null;
 	Statement myStmt = null;
 	ResultSet myRs = null;
@@ -76,6 +84,18 @@ public class RentManagement extends JDialog {
 	String selectAllQuery;
 	
 	public RentManagement() {
+		
+//		addWindowListener(new java.awt.event.WindowAdapter() {
+//		    @Override
+//		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+//		        if (JOptionPane.showConfirmDialog(
+//		            "Are you sure you want to close this window?", "Close Window?",
+//		            JOptionPane.YES_NO_OPTION,
+//		            JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+//				    System.out.println("-----");
+//		        }
+//		    }
+//		});
 
 		url = "jdbc:mysql://localhost:3306/";
 		username = "root";
@@ -83,8 +103,8 @@ public class RentManagement extends JDialog {
 		tableName = "LibraryManagementDB";
 		isAddition = false;
 
-		insertQuery = "insert into HireBookManagament (giveBackIntentDate, borrowedDate, bookId, readerId)"
-					+ " values (?, ?, ?, ?)";
+		insertQuery = "insert into HireBookManagament (giveBackIntentDate, borrowedDate, bookId, nameBook, readerId)"
+					+ " values (?, ?, ?, ?, ?)";
 		removeQuery = "DELETE FROM HireBookManagament WHERE id = ?";
 		selectAllQuery = "select * from HireBookManagament";
 
@@ -98,14 +118,49 @@ public class RentManagement extends JDialog {
 		prepareData();
 		loadDataReader();
 
+		MouseListener tableMouseListener = new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				isRemoval = false;
+//				print("is single select mode!");
+				selectedCells.clear();
+				int row = jt.rowAtPoint(e.getPoint());
+				String newEntry = "" + row;
+				selectedCells.add(newEntry);
+			}
+		};
+		jt.addMouseListener(tableMouseListener);
+		
+		removeAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				int cellIndex = 0;
+		    	String cellIndexString = "";
+		    	cellIndex = Integer.parseInt(selectedCells.get(0));
+		    	cellIndexString = selectedCells.get(0);
+		    	int foo;
+		    	try {
+		    	   foo = Integer.parseInt(cellIndexString);
+		    	}
+		    	catch (NumberFormatException er)
+		    	{
+		    	   foo = 0;
+		    	}
+		    	
+		    	if (model.getValueAt(foo, 7) == null || model.getValueAt(foo, 7).equals("")) {
+		    	} else if (model.getValueAt(foo, 7).equals("Chọn")) {
+		    		isRemoveBookFromCart = true;
+					model.setValueAt("", foo, 7);
+		    	}
+			}
+    	});
+
 		confirmBorrow.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
 			    System.out.println("-----");
 				for (int i = reader.getRowCount() - 1; i > -1 ; i--) {
 					if (((String) reader.getValueAt(i, 0)).equals(readerIDInput.getText())) {
-
-					    System.out.println("--+++---");
 						try {
 							// 1. Get a connection to database
 							myConn = DriverManager.getConnection(url + tableName, username, password);
@@ -114,26 +169,28 @@ public class RentManagement extends JDialog {
 							myStmt = myConn.createStatement();
 							
 							for (int j = 0; j < model.getRowCount(); j++) {
-								// the mysql insert statement
-							    String query = insertQuery;
-							    System.out.println("--+++---" + j);
-							    // create the mysql insert preparedstatement
-							    PreparedStatement preparedStmt = myConn.prepareStatement(query);
-							    preparedStmt.setString (1, dateReturnBackInput.getText());
-							    preparedStmt.setString (2, dateBorrowInput.getText());
-							    preparedStmt.setString (3, model.getValueAt(j, 0).toString());
-							    preparedStmt.setString (4, readerIDInput.getText());
-				
-							    // execute the preparedstatement
-							    System.out.println(preparedStmt);
-							    PreparedStatement addBorrowBookForm = myConn.prepareStatement("UPDATE Book SET state = '" + 
-							    readerIDInput.getText() + "' WHERE id = " + model.getValueAt(j, 0));
-
-							    System.out.println(addBorrowBookForm);
-							    preparedStmt.execute();
-							    addBorrowBookForm.execute();
-							    isAddition = true;
-							    model.setValueAt(readerIDInput.getText(), j, 7);
+								if (model.getValueAt(j, 7).equals("Chọn")) {
+									// the mysql insert statement
+								    String query = insertQuery;
+								    // create the mysql insert preparedstatement
+								    PreparedStatement preparedStmt = myConn.prepareStatement(query);
+								    preparedStmt.setString (1, dateReturnBackInput.getText());
+								    preparedStmt.setString (2, dateBorrowInput.getText());
+								    preparedStmt.setString (3, model.getValueAt(j, 0).toString());
+								    preparedStmt.setString (4, model.getValueAt(j, 1).toString());
+								    preparedStmt.setString (5, readerIDInput.getText());
+					
+								    // execute the preparedstatement
+								    System.out.println(readerIDInput.getText());
+								    PreparedStatement addBorrowBookForm = myConn.prepareStatement("UPDATE Book SET state = 'Độc giả id: " + 
+								    readerIDInput.getText() + "' WHERE id = " + model.getValueAt(j, 0));
+	
+								    System.out.println(addBorrowBookForm);
+								    preparedStmt.execute();
+								    addBorrowBookForm.execute();
+								    isAddition = true;
+								    model.setValueAt(readerIDInput.getText(), j, 7);
+								}
 							}// force call last
 						    myConn.close();
 						} catch (Exception exc) {
@@ -234,10 +291,10 @@ public class RentManagement extends JDialog {
 		//
 		confirmBorrow = new JButton("Xác nhận mượn sách");
 		confirmBorrow.setBounds(800, 50, 225, 50);
-		removeBook = new JButton("Xoá");
+		removeBook = new JButton("");
 		removeBook.setBounds(1025, 50, 85, 50);
-		removeAll = new JButton("Huỷ mượn sách");
-		removeAll.setBounds(800, 100, 310, 50);
+		removeAll = new JButton("Huỷ chọn sách");
+		removeAll.setBounds(800, 100, 225, 50);
 		
 		// 
 		
@@ -271,7 +328,7 @@ public class RentManagement extends JDialog {
 		add(dateReturnBackInput);
 	
 		add(confirmBorrow); // button
-		add(removeBook);
+//		add(removeBook);
 		add(removeAll);
 
 		add(errorLabel);   
