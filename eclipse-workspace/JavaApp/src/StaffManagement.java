@@ -3,6 +3,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -14,6 +15,7 @@ import java.awt.event.MouseListener;
 import java.sql.*;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -21,9 +23,10 @@ import javax.swing.table.DefaultTableModel;
 //import javax.swing.table.TableModel;
 //import javax.swing.table.DefaultTableCellRenderer;
 
+
 import java.util.Arrays; 
-//import java.util.ArrayList; 
-//import java.util.List;
+import java.util.ArrayList; 
+import java.util.List;
 import java.util.Vector;
 
 public class StaffManagement extends JDialog {
@@ -33,10 +36,10 @@ public class StaffManagement extends JDialog {
 	Connection myConn = null;
 	Statement myStmt = null;
 	ResultSet myRs = null;
-	DefaultTableModel model = new DefaultTableModel(new String[]{"id", "Ngày mượn", "Ngày hẹn trả", "Ngày trả", "Mã sách", "Tên sách", "Mã người mượn"}, 0);
+	DefaultTableModel model = new DefaultTableModel(new String[]{"id", "Tên người ", "ID người mượn", "Ngày mượn", "Ngày hẹn trả", "Trạng thái phiếu"}, 0);
 
     Vector<String> selectedCells = new Vector<String>();
-	String listColumn[] = {"id", "giveBackIntentDate", "borrowedDate", "giveBackDate", "bookId", "nameBook", "readerId"};
+	String listColumn[] = {"id", "nameReader", "idReader", "dateBorrow", "dateReturn", "didReturn"};
 	static <T> T[] append(T[] arr, T element) {
 	    final int N = arr.length;
 	    arr = Arrays.copyOf(arr, N + 1);
@@ -62,10 +65,12 @@ public class StaffManagement extends JDialog {
 	JLabel bookId;
 	JLabel bookName;
 	JLabel readerId;
+	JLabel errorLabel;
 	
 	JButton searchButton;
 	JButton doneSearchButton;
 	JButton confirmReturnBook;
+	JButton doubleclick;
 	
 	boolean isSearching;
 	String searchField;
@@ -84,24 +89,24 @@ public class StaffManagement extends JDialog {
 			myStmt = myConn.createStatement();
 			
 			// 3. Execute SQL query
-			myRs = myStmt.executeQuery("select * from HireBookManagament");
+			myRs = myStmt.executeQuery("SELECT * FROM Form");
 			
 			// 4. Process the result set
 			while (myRs.next()) {
 
 			    isSearching = true;
 			    String a = myRs.getString("id");
-			    String b = myRs.getString("giveBackIntentDate");
-			    String c = myRs.getString("borrowedDate");
-			    String d = myRs.getString("giveBackDate");
-			    String e = myRs.getString("bookId");
-			    String f = myRs.getString("nameBook");
-			    String g = myRs.getString("readerId");
-			    model.addRow(new Object[]{a, b, c, d, e, f, g});
+			    String b = myRs.getString("nameReader");
+			    String c = myRs.getString("idReader");
+			    String d = myRs.getString("dateBorrow");
+			    String e = myRs.getString("dateReturn");
+			    String f = myRs.getString("didReturn");
+			    model.addRow(new Object[]{a, b, c, d, e, f});
 			}
 			countRow = model.getRowCount();
 
             myConn.close();
+            isSearching = false;
 		}
 		catch (Exception exc) {
 			exc.printStackTrace();
@@ -110,7 +115,7 @@ public class StaffManagement extends JDialog {
 	
 	public StaffManagement() {
 
-		setTitle("Quản lý phiếu mượn/trả");
+		setTitle("Quản lý phiếu mượn/trả - Vũ Quý Đạt 20176082");
 	    jt = new JTable(model);
 
 		url = "jdbc:mysql://localhost:3306/";
@@ -191,11 +196,20 @@ public class StaffManagement extends JDialog {
 							int foo = Integer.parseInt(selectedCells.get(i));
 							Object idInHM = model.getValueAt(foo, 0);
 							Object bookId = model.getValueAt(foo, 4);
-						    String updateDateReturnQuery = "UPDATE HireBookManagament SET giveBackDate = '4/12/2020' WHERE id = " + idInHM;
-						    String updateBookStateQuery = "UPDATE Book SET state = '' WHERE id = " + bookId;
+							Object stateForm = model.getValueAt(foo, 5);
+							if (stateForm.equals("đã trả")) {
+								System.out.println(stateForm);
+								errorLabel.setText("Phiếu đã được trả");
+								resetError();
+								return;
+							}
+						    String updateDateReturnQuery = "UPDATE Form SET didReturn = 'đã trả' WHERE id = " + idInHM;
+						    String updateBookState = "UPDATE Book SET state = '' WHERE id = ";
+//						    String updateBookStateQuery = "UPDATE Book SET state = '' WHERE id = " + bookId;
+						    String getBookOfFrom = "SELECT * FROM mapping WHERE form = " + idInHM;
 								    // create the mysql insert preparedstatement
 						    PreparedStatement preparedStmt = myConn.prepareStatement(updateDateReturnQuery);
-						    PreparedStatement preparedStmt2 = myConn.prepareStatement(updateBookStateQuery);
+//						    PreparedStatement preparedStmt2 = myConn.prepareStatement(updateBookStateQuery);
 //								    preparedStmt.setString (1, dateReturnBackInput.getText());
 //								    preparedStmt.setString (2, dateBorrowInput.getText());
 //								    preparedStmt.setString (3, model.getValueAt(j, 0).toString());
@@ -209,9 +223,28 @@ public class StaffManagement extends JDialog {
 //	
 //								    System.out.println(addBorrowBookForm);
 								    preparedStmt.execute();
-								    preparedStmt2.execute();
+//								    preparedStmt2.execute();
 //								    isAddition = true;
-								    model.setValueAt("4/12/2020", foo, 3);
+//								    model.setValueAt("4/12/2020", foo, 3);
+
+								    myRs = myStmt.executeQuery(getBookOfFrom);
+									// 4. Process the result 
+								    ArrayList<String> ar = new ArrayList<String>();
+								    int count = 0;
+									while (myRs.next()) {
+									    String a = myRs.getString("bookid");
+									    ar.add(a);
+									    count++;
+									}
+									System.out.println(ar);
+									for (int j = 0; j < count; j++) {
+										String updateBook = updateBookState + ar.get(j);
+										PreparedStatement preparedupdateBookStateStmt = myConn.prepareStatement(updateBook);
+										preparedupdateBookStateStmt.execute();
+										System.out.println(updateBook);
+									}
+								    
+								    
 								
 						    myConn.close();
 						} catch (Exception exc) {
@@ -236,21 +269,20 @@ public class StaffManagement extends JDialog {
 					myStmt = myConn.createStatement();
 					getSearchText();
 					// the mysql insert statement
-				    String query = "SELECT * FROM HireBookManagament WHERE " + searchField + " LIKE " + getSearchText();
+				    String query = "SELECT * FROM Form WHERE " + searchField + " LIKE " + getSearchText();
 
 					System.out.println(query);
 					// 3. Execute SQL query
-					myRs = myStmt.executeQuery("select * from HireBookManagament WHERE " + searchField + " LIKE '" + getSearchText() + "'");// 4. Process the result set
+					myRs = myStmt.executeQuery("select * from Form WHERE " + searchField + " LIKE '" + getSearchText() + "'");// 4. Process the result set
 					while (myRs.next()) {
 						isSearching = true;
 					    String a = myRs.getString("id");
-					    String b = myRs.getString("giveBackIntentDate");
-					    String c = myRs.getString("borrowedDate");
-					    String d = myRs.getString("giveBackDate");
-					    String ee = myRs.getString("bookId");
-					    String f = myRs.getString("nameBook");
-					    String g = myRs.getString("readerId");
-					    model.addRow(new Object[]{a, b, c, d, ee, f, g});
+					    String b = myRs.getString("nameReader");
+					    String c = myRs.getString("idReader");
+					    String d = myRs.getString("dateBorrow");
+					    String ee = myRs.getString("dateReturn");
+					    String f = myRs.getString("didReturn");
+					    model.addRow(new Object[]{a, b, c, d, ee, f});
 
 					}
 					countRow = model.getRowCount();
@@ -272,7 +304,7 @@ public class StaffManagement extends JDialog {
 		dateBorrow.setBounds(160, 0, 200, 50);
 		add(dateBorrow);
 
-		JLabel name = new JLabel("Ngày mượn");
+		JLabel name = new JLabel("ID phiếu mượn");
 		name.setBounds(10, 0, 100, 50);
 		add(name);
 		//
@@ -280,7 +312,7 @@ public class StaffManagement extends JDialog {
 		dateReturnIntent.setBounds(160, 50, 200, 50);
 		add(dateReturnIntent);
 
-		JLabel type = new JLabel("Ngày hẹn trả");
+		JLabel type = new JLabel("Tên người mượn");
 		type.setBounds(10, 50, 100, 50);
 		add(type);
 		
@@ -289,7 +321,7 @@ public class StaffManagement extends JDialog {
 		dateReturn.setBounds(510, 0, 200, 50);
 		add(dateReturn);
 
-		JLabel nxb = new JLabel("Ngày trả");
+		JLabel nxb = new JLabel("ID người mượn");
 		nxb.setBounds(370, 0, 100, 50);
 		add(nxb);
 
@@ -344,6 +376,7 @@ public class StaffManagement extends JDialog {
 	    jt.getModel().addTableModelListener(new TableModelListener(){
 			@Override
 			public void tableChanged(TableModelEvent e) {
+				
 				// TODO Auto-generated method stub
 
 				if (isSearching) {
@@ -356,8 +389,8 @@ public class StaffManagement extends JDialog {
 			        	return;
 			        }
 			        
-			        String sqlupdate = "UPDATE HireBookManagament SET " + listColumn[column] + " = '" + model.getValueAt(row, column) + "' WHERE id = " + model.getValueAt(row, 0);
-			        
+			        String sqlupdate = "UPDATE Form SET " + listColumn[column] + " = '" + model.getValueAt(row, column) + "' WHERE id = " + model.getValueAt(row, 0);
+			       System.out.println(sqlupdate);
 						try {
 							// 1. Get a connection to database
 							myConn = DriverManager.getConnection(url + tableName, username, password);
@@ -384,24 +417,37 @@ public class StaffManagement extends JDialog {
 //	    setVisible(true);    
 	}
 	
+	void resetError() {
+		new java.util.Timer().schedule( 
+		        new java.util.TimerTask() {
+		            @Override
+		            public void run() {
+		                // your code here
+		            	errorLabel.setText("");
+		            }
+		        }, 
+		        3000 
+		);
+	}
+	
 	String getSearchText() {
 		if (bookIdInput.getText() != null && !bookIdInput.getText().contentEquals("")) {
-			searchField = "bookId";
+			searchField = "dateBorrow";
 			return bookIdInput.getText();
 		} else if (bookNameInput.getText() != null && !bookNameInput.getText().contentEquals("")) {
-			searchField = "nameBook";
+			searchField = "dateReturn";
 			return bookNameInput.getText();
 		} else if (readerIdInput.getText() != null && !readerIdInput.getText().contentEquals("")) {
-			searchField = "readerId";
+			searchField = "didReturn";
 			return readerIdInput.getText();
 		} else if (dateBorrow.getText() != null && !dateBorrow.getText().contentEquals("")) {
-			searchField = "borrowedDate";
+			searchField = "id";
 			return dateBorrow.getText();
 		} else if (dateReturnIntent.getText() != null && !dateReturnIntent.getText().contentEquals("")) {
-			searchField = "giveBackDate";
+			searchField = "nameReader";
 			return dateReturnIntent.getText();
 		} else if (dateReturn.getText() != null && !dateReturn.getText().contentEquals("")) {
-			searchField = "giveBackDate";
+			searchField = "dateReturn";
 			return dateReturn.getText();
 		}
 		return "";
@@ -413,9 +459,9 @@ public class StaffManagement extends JDialog {
 		bookNameInput = new JTextField("", 5);
 		readerIdInput = new JTextField("", 5);
 
-		bookId = new JLabel("Mã sách");
-		bookName = new JLabel("Tên sách");
-		readerId = new JLabel("Mã độc giả");
+		bookId = new JLabel("Ngày mượn");
+		bookName = new JLabel("Ngày hẹn trả");
+		readerId = new JLabel("Trạng thái phiếu");
 		
 		bookNameInput.setBounds(510, 100, 200, 50);
 		readerIdInput.setBounds(160, 100, 200, 50);
@@ -427,6 +473,13 @@ public class StaffManagement extends JDialog {
 		doneSearchButton = new JButton("Xong");
 		doneSearchButton.setBounds(470, 150, 50, 50);
 		confirmReturnBook = new JButton("Xác nhận trả sách");
+
+		doubleclick = new JButton("Xem chi tiết phiếu");
+		doubleclick.setBounds(720, 150, 150, 50);
+
+		errorLabel = new JLabel("", SwingConstants.CENTER);
+		errorLabel.setBounds(10, 200, 1180, 50);
+		errorLabel.setForeground(Color.RED);
 		
 		add(bookIdInput);
 		add(bookNameInput);
@@ -437,6 +490,8 @@ public class StaffManagement extends JDialog {
 		add(searchButton);
 		add(doneSearchButton);
 		add(confirmReturnBook);
+		add(errorLabel);
+		add(doubleclick);
 
 	    ownerMark = new JLabel("Vũ Quý Đạt - MSSV: 20176082 - Lớp: Vuwit16b");
 		add(ownerMark);

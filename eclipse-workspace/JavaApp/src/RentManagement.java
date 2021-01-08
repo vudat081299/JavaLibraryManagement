@@ -42,7 +42,9 @@ public class RentManagement extends JDialog {
 	// UI
 	JLabel formTitle;
 	JLabel readerID;
+	JLabel readername;
 	JTextField readerIDInput;
+	JTextField readernameInput;
 	JLabel dateBorrow;
 	JTextField dateBorrowInput;
 	JLabel dateReturnBack;
@@ -82,6 +84,9 @@ public class RentManagement extends JDialog {
 	String insertQuery;
 	String removeQuery;
 	String selectAllQuery;
+	String getLatestFormQuery;
+	String getLatestMapQuery;
+	String insertMappingQeury;
 	
 	public RentManagement() {
 		
@@ -103,10 +108,13 @@ public class RentManagement extends JDialog {
 		tableName = "LibraryManagementDB";
 		isAddition = false;
 
-		insertQuery = "insert into HireBookManagament (giveBackIntentDate, borrowedDate, bookId, nameBook, readerId)"
-					+ " values (?, ?, ?, ?, ?)";
+		insertQuery = "insert into Form (id, nameReader, idReader, dateBorrow, dateReturn, didReturn, sum)"
+					+ " values (?, ?, ?, ?, ?, ?, ?)";
+		insertMappingQeury = "insert into mapping (id, form, bookid, name, type, author, publisher, publishedDate, dataType, state)" 
+					+ " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		removeQuery = "DELETE FROM HireBookManagament WHERE id = ?";
-		selectAllQuery = "select * from HireBookManagament";
+		getLatestFormQuery = "SELECT * FROM Form";
+		getLatestMapQuery = "SELECT * FROM mapping";
 
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setTitle("Quản lý mượn trả");
@@ -157,8 +165,8 @@ public class RentManagement extends JDialog {
 
 		confirmBorrow.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
-			    System.out.println("-----");
+				String formID = getNextID();
+			    System.out.println(")))");
 				for (int i = reader.getRowCount() - 1; i > -1 ; i--) {
 					if (((String) reader.getValueAt(i, 0)).equals(readerIDInput.getText())) {
 						try {
@@ -167,37 +175,88 @@ public class RentManagement extends JDialog {
 							
 							// 2. Create a statement
 							myStmt = myConn.createStatement();
-							
-							for (int j = 0; j < model.getRowCount(); j++) {
-								if (model.getValueAt(j, 7).equals("Chọn")) {
+
 									// the mysql insert statement
 								    String query = insertQuery;
 								    // create the mysql insert preparedstatement
 								    PreparedStatement preparedStmt = myConn.prepareStatement(query);
-								    preparedStmt.setString (1, dateReturnBackInput.getText());
-								    preparedStmt.setString (2, dateBorrowInput.getText());
-								    preparedStmt.setString (3, model.getValueAt(j, 0).toString());
-								    preparedStmt.setString (4, model.getValueAt(j, 1).toString());
-								    preparedStmt.setString (5, readerIDInput.getText());
+								    preparedStmt.setString (1, formID);
+								    preparedStmt.setString (2, readernameInput.getText());
+								    preparedStmt.setString (3, readernameInput.getText());
+								    preparedStmt.setString (4, dateBorrowInput.getText());
+								    preparedStmt.setString (5, dateReturnBackInput.getText());
+								    preparedStmt.setString (6, "Chưa trả");
+								    preparedStmt.setInt (7, model.getRowCount());
+								    preparedStmt.execute();
 					
+							for (int j = 0; j < model.getRowCount(); j++) {
+								if (model.getValueAt(j, 7).equals("Chọn")) {
+
+									myConn = DriverManager.getConnection(url + tableName, username, password);
+									myStmt = myConn.createStatement();
 								    // execute the preparedstatement
 								    System.out.println(readerIDInput.getText());
-								    PreparedStatement addBorrowBookForm = myConn.prepareStatement("UPDATE Book SET state = 'Độc giả id: " + 
-								    readerIDInput.getText() + "' WHERE id = " + model.getValueAt(j, 0));
+								    PreparedStatement addBorrowBookForm = myConn.prepareStatement("UPDATE Book SET state = 'phiếu mượn id: " + formID + "' WHERE id = " + model.getValueAt(j, 0));
 	
 								    System.out.println(addBorrowBookForm);
-								    preparedStmt.execute();
 								    addBorrowBookForm.execute();
 								    isAddition = true;
 								    model.setValueAt(readerIDInput.getText(), j, 7);
+				
+								    
+									PreparedStatement addMapping = myConn.prepareStatement(insertMappingQeury);
+
+								    
+								    myRs = myStmt.executeQuery("select * from Book WHERE id = " + model.getValueAt(j, 0));
+								    String a = "";
+								    String b = "";
+								    String c = "";
+								    String d = "";
+								    String ee = "";
+								    String f = "";
+								    String g = "";
+								    String h = "";
+								    while (myRs.next()) {
+									     a = myRs.getString("id");
+									     b = myRs.getString("name");
+									     c = myRs.getString("type");
+									     d = myRs.getString("author");
+									     ee = myRs.getString("publisher");
+									     f = myRs.getString("publishedDate");
+									     g = myRs.getString("dataType");
+									     h = myRs.getString("state");
+									}
+
+								    System.out.println(a);
+								    System.out.println(b);
+								    addMapping.setString (1, getNextIDMap());
+								    addMapping.setString (2, formID);
+								    addMapping.setString (3, a);
+								    addMapping.setString (4, b);
+								    addMapping.setString (5, c);
+								    addMapping.setString (6, d);
+								    addMapping.setString (7, ee);
+								    addMapping.setString (8, f);
+								    addMapping.setString (9, g);
+								    addMapping.setString (10, h);
+								    addMapping.execute();
+								    
+								    System.out.println(addMapping);
+//								    insertMappingQeury
+								    
+								    
+								    
+								    
+
 								}
-							}// force call last
+							} // force call last
 						    myConn.close();
 						} catch (Exception exc) {
 							exc.printStackTrace();
 						}
 					}
 				}
+				dispose();
 //				if (!validate("")) {
 //					System.out.print(validate(""));
 //					return;
@@ -205,6 +264,77 @@ public class RentManagement extends JDialog {
 				
 			}
 		});
+	}
+	
+	
+	String getNextIDMap () {
+		String a = "";
+
+		System.out.print("___+_+");
+		try {
+			// 1. Get a connection to database
+			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/LibraryManagementDB", "root" , "Iviundhacthi8987m");
+			
+			// 2. Create a statement
+			myStmt = myConn.createStatement();
+			
+			// 3. Execute SQL query
+			myRs = myStmt.executeQuery(getLatestMapQuery);
+			
+			// 4. Process the result set
+			while (myRs.next()) {
+			    a = myRs.getString("id");
+			}
+			if (a == null || a == "") {
+				a = "1";
+				System.out.println(a);
+			} else {
+				a = (Integer.parseInt(a) + 1) + "";
+			}
+			System.out.print(a);
+			System.out.print(myRs.next());
+
+            myConn.close();
+		}
+		catch (Exception exc) {
+			exc.printStackTrace();
+		}
+		return a;
+	}
+	
+	String getNextID () {
+		String a = "";
+
+		System.out.print("___+_+");
+		try {
+			// 1. Get a connection to database
+			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/LibraryManagementDB", "root" , "Iviundhacthi8987m");
+			
+			// 2. Create a statement
+			myStmt = myConn.createStatement();
+			
+			// 3. Execute SQL query
+			myRs = myStmt.executeQuery(getLatestFormQuery);
+			
+			// 4. Process the result set
+			while (myRs.next()) {
+			    a = myRs.getString("id");
+			}
+			if (a == null || a == "") {
+				a = "1";
+				System.out.println(a);
+			} else {
+				a = (Integer.parseInt(a) + 1) + "";
+			}
+			System.out.print(a);
+			System.out.print(myRs.next());
+
+            myConn.close();
+		}
+		catch (Exception exc) {
+			exc.printStackTrace();
+		}
+		return a;
 	}
 	
 	void loadDataReader() {
@@ -277,6 +407,12 @@ public class RentManagement extends JDialog {
 		readerIDInput.setBounds(130, 50, 200, 50);
 
 		//
+		readername = new JLabel("Tên độc giả");
+		readername.setBounds(400, 50, 100, 50);
+		readernameInput = new JTextField("", 5);
+		readernameInput.setBounds(510, 50, 200, 50);
+
+		//
 		dateBorrow = new JLabel("Ngày mượn");
 		dateBorrow.setBounds(10, 100, 100, 50);
 		dateBorrowInput = new JTextField("", 5);
@@ -322,6 +458,8 @@ public class RentManagement extends JDialog {
 		add(formTitle);   
 		add(readerID);
 		add(readerIDInput);
+		add(readername);
+		add(readernameInput);
 		add(dateBorrow);
 		add(dateBorrowInput);
 		add(dateReturnBack);
@@ -334,6 +472,7 @@ public class RentManagement extends JDialog {
 		add(errorLabel);   
 		add(titleTable);   
 	    add(sp); // scroll pane
+	    
 	    
 	    // set centre header for table
 //	    DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) jt.getTableHeader().getDefaultRenderer();

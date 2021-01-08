@@ -66,6 +66,7 @@ public class InsertBookForm extends JDialog {
 	JButton addBookIntoCartButton;
 	JButton removeBookFromCartButton;
 	JButton doneSearchButton;
+	JButton reload;
 
 	JLabel errorLabel;
 	JLabel titleTable;
@@ -108,7 +109,7 @@ public class InsertBookForm extends JDialog {
 	public InsertBookForm() {
 
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setTitle("Quản lý đầu sách thư viện");
+		setTitle("Quản lý đầu sách thư viện - Vũ Quý Đạt 20176082");
 		// initializers - not for array constants
 
 		url = "jdbc:mysql://localhost:3306/";
@@ -447,6 +448,13 @@ public class InsertBookForm extends JDialog {
 	            }
 			}
 		});
+		
+		reload.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				loadDataFromDB();
+				comfirmBorrowButton.setText("Giỏ sách (0)");
+			}
+		});
 
 	    jt.getModel().addTableModelListener(new TableModelListener(){
 			@Override
@@ -454,6 +462,17 @@ public class InsertBookForm extends JDialog {
             	print("---------");
 				System.out.println(e);
 				if (isAddition || isRemoval || isSelectedBook || isRemoveBookFromCart || isSearching) {
+					System.out.println(isAddition);
+	            	print("--1-------");
+					System.out.println(isRemoval);
+	            	print("---2------");
+					System.out.println(isSelectedBook);
+	            	print("----3-----");
+					System.out.println(isRemoveBookFromCart);
+	            	print("---4------");
+					System.out.println(isSearching);
+	            	print("---5------");
+					
 					print("can not edit row!");
 					isAddition = false;
 					isRemoval = false;
@@ -466,6 +485,7 @@ public class InsertBookForm extends JDialog {
 			        int row = e.getFirstRow();
 			        int column = e.getColumn();
 			        if (column == 0) {
+						print("Can not edit id!");
 			        	return;
 			        }
 			        
@@ -545,6 +565,10 @@ public class InsertBookForm extends JDialog {
 		System.out.println(string);
 	}
 	void loadDataFromDB() {
+		while (model.getRowCount() > 0) {
+			isAddition = true;
+			model.removeRow(0);
+		}
 		try {
 			// 1. Get a connection to database
 			myConn = DriverManager.getConnection(url + tableName, username, password);
@@ -557,6 +581,8 @@ public class InsertBookForm extends JDialog {
 			
 			// 4. Process the result set
 			while (myRs.next()) {
+
+				isAddition = true; 
 			    String a = myRs.getString("id");
 			    String b = myRs.getString("name");
 			    String c = myRs.getString("type");
@@ -565,7 +591,6 @@ public class InsertBookForm extends JDialog {
 			    String f = myRs.getString("publishedDate");
 			    String g = myRs.getString("dataType");
 			    String h = myRs.getString("state");
-			    isSearching = true;
 			    model.addRow(new Object[]{a, b, c, d, e, f ,g, h});
 
 			}
@@ -650,10 +675,21 @@ public class InsertBookForm extends JDialog {
 		errorLabel.setBounds(10, 170, 1180, 50);
 		errorLabel.setForeground(Color.RED);
 		titleTable = new JLabel("Bảng danh sách các đầu sách trong thư viện");
+		reload =  new JButton("Reload danh sách");
+		reload.setBounds(1040, 220, 150, 30);
 		titleTable.setBounds(10,-20,780,500);
 		model = new DefaultTableModel(new Object[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách", "Trạng thái"}, 0);
 //		listSelectedItem = new DefaultTableModel(new Object[]{"Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Ngày xuất bản", "Kiểu sách", "Trạng thái"}, 0);
-	    jt = new JTable(model);    
+	    jt = new JTable(model) {
+	    	private static final long serialVersionUID = 1L;
+			public boolean isCellEditable(int row, int column) {
+				if (column == 0 || column == 7) {
+	    	        return false;
+				}
+				return true;
+	   	    }
+	    };
+	    jt.getTableHeader().setReorderingAllowed(false);
 	    jt.setBounds(10,250,1180,500); 
 	    jt.getColumnModel().getColumn(0).setPreferredWidth(20);
 	    jt.getColumnModel().getColumn(1).setPreferredWidth(120);
@@ -695,6 +731,7 @@ public class InsertBookForm extends JDialog {
 
 		add(errorLabel);   
 		add(titleTable);   
+		add(reload);   
 	    add(sp); // scroll pane
 	    add(ownerMark);
 	    

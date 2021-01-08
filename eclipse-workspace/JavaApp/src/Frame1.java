@@ -19,7 +19,7 @@ public class Frame1 {
 	String titleOfAppFrame = "Quản lý thư viện";
 	String titleOfBookManagementFrame = "Quản lý đầu sách";
 	String titleOfReaderManagementFrame = "Quản lý độc giả";
-	String titleOfRentingBookFrame = "Quản lý mượn/trả sách";
+	String titleOfRentingBookFrame = "Quản lý phiếu mượn/trả sách";
 	
 	String titleHotelManagement = "Quản lý khách sạn";
 	String titleRoomManagement = "Quản lý phòng khách sạn";

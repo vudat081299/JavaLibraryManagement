@@ -78,6 +78,7 @@ public class InsertReader extends JDialog {
 
 	boolean isAddition;
 	boolean isSearching;
+	boolean isReloadingData;
 
 	Connection myConn = null;
 	Statement myStmt = null;
@@ -124,7 +125,8 @@ public class InsertReader extends JDialog {
 			// 4. Process the result set
 			while (myRs.next()) {
 				System.out.println(myRs.getString("phonenumber") + ", " + myRs.getString("name"));
-				isSearching = true;
+				isSearching = false;
+				isReloadingData = true;
 			    String a = myRs.getString("id");
 			    String b = myRs.getString("name");
 			    String c = myRs.getString("phonenumber");
@@ -139,6 +141,7 @@ public class InsertReader extends JDialog {
 			countRow = model.getRowCount();
 
             myConn.close();
+            isReloadingData = false;
 		}
 		catch (Exception exc) {
 			exc.printStackTrace();
@@ -147,7 +150,7 @@ public class InsertReader extends JDialog {
 	
 	public InsertReader() {
 
-		setTitle("Quản lý độc giả");
+		setTitle("Quản lý độc giả - Vũ Quý Đạt 20176082");
 		// Table mouse and keypressed listener
 		tableKeyListener = (KeyListener) new KeyAdapter() {
 			@Override
@@ -169,7 +172,10 @@ public class InsertReader extends JDialog {
 		tableMouseListener = new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				System.out.println("keyevent: " + e);
+			    System.out.println("mouseClicked");
+
+				System.out.println(model.getRowCount());
+				System.out.println("keyevoent: " + e);
 				if (pressingCTRL == true) { //check if user is pressing CTRL key
 				    isRemoval = true;
 					int row = jt.rowAtPoint(e.getPoint()); //get mouse-selected row
@@ -184,12 +190,14 @@ public class InsertReader extends JDialog {
 //						print("is not contain!");
 					}
 				} else {
+				    System.out.println("++++++");
 				    isRemoval = false;
 //					print("is single select mode!");
 				    selectedCells.clear();
 					int row = jt.rowAtPoint(e.getPoint());
 					String newEntry = "" + row;
 				    selectedCells.add(newEntry);
+				    System.out.println(newEntry);
 				}
 			    System.out.println("list cell selected" + selectedCells);
 			}
@@ -276,6 +284,7 @@ public class InsertReader extends JDialog {
 		
 		doneSearchButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				System.out.print("doneSearchButton");
 				for (int i = model.getRowCount() - 1; i > -1 ; i--) {
 					isSearching = true;
 					model.removeRow(i);
@@ -286,6 +295,7 @@ public class InsertReader extends JDialog {
 		
 		searchButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				System.out.print("searchButton");
 				for (int i = model.getRowCount() - 1; i > -1 ; i--) {
 					isSearching = true;
 					model.removeRow(i);
@@ -329,6 +339,7 @@ public class InsertReader extends JDialog {
 
 		addReaderButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				System.out.print("actionPerformed");
 				if (!validate("")) {
 					System.out.print(validate(""));
 					return;
@@ -376,26 +387,33 @@ public class InsertReader extends JDialog {
 	    jt.getModel().addTableModelListener(new TableModelListener(){
 			@Override
 			public void tableChanged(TableModelEvent e) {
-				if (isAddition || isRemoval || isSearching) {
+				System.out.print("tableChanged");
+				if (isAddition || isRemoval || isSearching || isReloadingData) {
 					isAddition = false;
 					isRemoval = false;
 					isSearching = false;
+					isReloadingData = false;
+					System.out.print(isReloadingData);
 				} else {
 					// TODO Auto-generated method stub
-	
+
 			        int row = e.getFirstRow();
 			        int column = e.getColumn();
 			        if (column == 0) {
 			        	return;
 			        }
 			        Object data = model.getValueAt(row, column);
+
+					System.out.print("33333");
+			        String sqlupdate = "UPDATE Reader SET " + listColumn[column] + " = '" + data + "' WHERE id = " + model.getValueAt(row, 0);;
+					System.out.print(sqlupdate);
 			        
-			        String sqlupdate = "UPDATE Reader SET " + listColumn[column] + " = '" + data + "' WHERE id = " + ++row;
 					if(column != 0) {
 						try {
 							// 1. Get a connection to database
 							myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/LibraryManagementDB", "root" , "Iviundhacthi8987m");
-							
+
+							System.out.print("66666");
 							// 2. Create a statement
 							myStmt = myConn.createStatement();
 							
@@ -424,8 +442,15 @@ public class InsertReader extends JDialog {
 	}
 	
 	void setupFunction () {
-
-		jt = new JTable(model);
+	    jt = new JTable(model) {
+	    	private static final long serialVersionUID = 1L;
+			public boolean isCellEditable(int row, int column) {
+				if (column == 0) {
+	    	        return false;
+				}
+				return true;
+	   	    }
+	    };
 		jt.addKeyListener(tableKeyListener);
 		jt.addMouseListener(tableMouseListener);
 	}
