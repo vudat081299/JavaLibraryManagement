@@ -24,7 +24,8 @@ import javax.swing.table.DefaultTableModel;
 //import javax.swing.table.DefaultTableCellRenderer;
 
 
-import java.util.Arrays; 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.ArrayList; 
 import java.util.List;
 import java.util.Vector;
@@ -32,6 +33,8 @@ import java.util.Vector;
 public class StaffManagement extends JDialog {
 	private static final TableModelListener StaffManagement = null;
 	int countRow = 0;
+
+	static String formID = "";
 
 	Connection myConn = null;
 	Statement myStmt = null;
@@ -51,6 +54,7 @@ public class StaffManagement extends JDialog {
 	String username;
 	String password;
 	String tableName;
+	String removeQuery;
 	
 	JTable jt;
 	boolean pressingCTRL=false;//flag, if pressing CTRL it is true, otherwise it is false.
@@ -71,11 +75,17 @@ public class StaffManagement extends JDialog {
 	JButton doneSearchButton;
 	JButton confirmReturnBook;
 	JButton doubleclick;
+	JButton delete;
 	
 	boolean isSearching;
+	boolean isRemoval;
 	String searchField;
 
 	JLabel ownerMark;
+	
+	JButton cancelRemove;
+	JButton confirmRemove;
+	JLabel askRemove;
 	
 	void loadData() {
 //		model = null;
@@ -118,6 +128,7 @@ public class StaffManagement extends JDialog {
 		setTitle("Quản lý phiếu mượn/trả - Vũ Quý Đạt 20176082");
 	    jt = new JTable(model);
 
+		removeQuery = "DELETE FROM Form WHERE id = ?";
 		url = "jdbc:mysql://localhost:3306/";
 		username = "root";
 		password = "Iviundhacthi8987m";
@@ -254,6 +265,18 @@ public class StaffManagement extends JDialog {
 			}
 		});
 		
+
+		doubleclick.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int foo = Integer.parseInt(selectedCells.get(0));
+				formID = "" + model.getValueAt(foo, 0);
+				DetailForm detailform = new DetailForm();
+				detailform.pack();
+				detailform.setBounds(300, 200, 1200, 600);
+				detailform.setVisible(true);
+			}
+		});
+		
 		searchButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for (int i = model.getRowCount() - 1; i > -1 ; i--) {
@@ -364,6 +387,110 @@ public class StaffManagement extends JDialog {
 //		add(addBookButton);
 		
 
+		delete.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+
+				cancelRemove.setVisible(true);
+				confirmRemove.setVisible(true);
+				askRemove.setVisible(true);
+//				cancelRemove.setVisible(true);
+//				confirmRemove.setVisible(true);
+				removeGroupRemove();
+			}
+		});
+		
+		
+		cancelRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				cancelRemove.setVisible(false);
+				confirmRemove.setVisible(false);
+				askRemove.setVisible(false);
+			}
+		});
+		
+		confirmRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (selectedCells.size() > 0) {
+					
+				} else {
+					return;
+				}
+
+				try {
+					// 1. Get a connection to database
+					myConn = DriverManager.getConnection(url + tableName, username, password);
+					
+					// 2. Create a statement
+					myStmt = myConn.createStatement();
+					
+					// the mysql insert statement
+				    String query = removeQuery;
+				    System.out.println(selectedCells);
+				    // create the mysql insert preparedstatement
+//				    PreparedStatement preparedStmt = myConn.prepareStatement(query);
+//				    PreparedStatement preparedStmt = myConn.prepareStatement(query);
+				    
+				    // execute the preparedstatement
+//				    model.addRow(new Object[]{countRow, nameInput.getText(), typeInput.getText(), authorInput.getText(), 
+//				    		nxbInput.getText(), publisedhDateInput.getText(), dataTypeInput.getText()});	
+
+
+//				    Comparator<Object> comparator = Collections.reverseOrder();
+//				    Collections.sort(selectedCells,comparator);
+//				    while (true) {
+//				    	int loop = 0;
+//				    	for (loop = 0; loop < selectedCells.size(); loop++) {
+//				    		if (Integer.parseInt(model.getValueAt(Integer.parseInt(selectedCells.get(loop)), 0).toString()) < Integer.parseInt(model.getValueAt(Integer.parseInt(selectedCells.get(loop)), 0).toString())) {
+//				    			
+//				    		}
+//				    		
+//				    		if (loop == selectedCells.size() - 1) {
+//				    			break;
+//				    		}
+//				    	}
+//				    	break;
+//				    }
+		            	int cellIndex = 0;
+		            	String cellIndexString = "";
+		            			cellIndex = Integer.parseInt(selectedCells.get(0));
+		            			cellIndexString = selectedCells.get(0);
+		            	selectedCells.remove(cellIndexString);
+					    isRemoval = true;
+					    PreparedStatement preparedStmt = myConn.prepareStatement(query);
+		            	int foo;
+		            	try {
+		            	   foo = Integer.parseInt(cellIndexString);
+		            	}
+		            	catch (NumberFormatException er)
+		            	{
+		            	   foo = 0;
+		            	}
+					    PreparedStatement fixBookTable = myConn.prepareStatement("UPDATE Book SET state = '' WHERE state = 'phiếu mượn id: " +  Integer.parseInt(model.getValueAt(foo, 0).toString()) + "'");
+		            	preparedStmt.setInt (1, Integer.parseInt(model.getValueAt(foo, 0).toString()));
+		            	preparedStmt.executeUpdate();
+		            	fixBookTable.executeUpdate();
+			            	
+				            model.removeRow(foo);
+		
+
+	            
+					// force call last
+				    myConn.close();
+				} catch (Exception exc) {
+					System.out.println(exc);
+					exc.printStackTrace();
+				}
+
+				cancelRemove.setVisible(false);
+				confirmRemove.setVisible(false);
+				askRemove.setVisible(false);
+			}
+			
+		});
+		
+
 		ownerMark.setBounds(10,700,1180,30);
 		confirmReturnBook.setBounds(560, 150, 150, 50);
 		doneSearchButton.setBounds(470, 150, 50, 50);
@@ -379,8 +506,9 @@ public class StaffManagement extends JDialog {
 				
 				// TODO Auto-generated method stub
 
-				if (isSearching) {
+				if (isSearching || isRemoval) {
 					isSearching = false;
+					isRemoval = false;
 				} else {
 
 			        int row = e.getFirstRow();
@@ -416,6 +544,22 @@ public class StaffManagement extends JDialog {
 	    add(sp);             
 //	    setVisible(true);    
 	}
+
+void removeGroupRemove() {
+
+	new java.util.Timer().schedule( 
+	        new java.util.TimerTask() {
+	            @Override
+	            public void run() {
+	                // your code here
+	cancelRemove.setVisible(false);
+	confirmRemove.setVisible(false);
+	askRemove.setVisible(false);
+	            }
+	        }, 
+	        5000 
+	);
+}
 	
 	void resetError() {
 		new java.util.Timer().schedule( 
@@ -476,10 +620,33 @@ public class StaffManagement extends JDialog {
 
 		doubleclick = new JButton("Xem chi tiết phiếu");
 		doubleclick.setBounds(720, 150, 150, 50);
+		delete = new JButton("Xoá");
+		delete.setBounds(880, 150, 50, 50);
 
 		errorLabel = new JLabel("", SwingConstants.CENTER);
 		errorLabel.setBounds(10, 200, 1180, 50);
 		errorLabel.setForeground(Color.RED);
+		
+
+	    askRemove = new JLabel("Bạn có chắc chắn muốn xoá phiếu mượn đã chọn!", SwingConstants.CENTER);
+	    askRemove.setBounds(100, 195, 1000, 30);
+		
+		cancelRemove =  new JButton("Huỷ");
+		cancelRemove.setBounds(500, 220, 80, 30);
+		cancelRemove.setForeground(Color.RED);
+		
+
+		confirmRemove =  new JButton("Xoá");
+		confirmRemove.setBounds(580, 220, 80, 30);
+		confirmRemove.setBackground(Color.BLUE);
+		confirmRemove.setForeground(Color.BLUE);
+		cancelRemove.setVisible(false);
+		confirmRemove.setVisible(false);
+		askRemove.setVisible(false);
+		add(cancelRemove);
+		add(confirmRemove);
+		add(askRemove);
+		
 		
 		add(bookIdInput);
 		add(bookNameInput);
@@ -492,6 +659,7 @@ public class StaffManagement extends JDialog {
 		add(confirmReturnBook);
 		add(errorLabel);
 		add(doubleclick);
+		add(delete);
 
 	    ownerMark = new JLabel("Vũ Quý Đạt - MSSV: 20176082 - Lớp: Vuwit16b");
 		add(ownerMark);

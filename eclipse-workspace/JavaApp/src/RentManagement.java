@@ -415,7 +415,7 @@ public class RentManagement extends JDialog {
 		//
 		dateBorrow = new JLabel("Ngày mượn");
 		dateBorrow.setBounds(10, 100, 100, 50);
-		dateBorrowInput = new JTextField("", 5);
+		dateBorrowInput = new JTextField("15/1/2021", 5);
 		dateBorrowInput.setBounds(130, 100, 200, 50);
 
 		//

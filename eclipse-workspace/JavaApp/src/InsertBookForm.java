@@ -59,6 +59,9 @@ public class InsertBookForm extends JDialog {
 	JTextField dataTypeInput;
 	JButton addBookButton;
 	JButton removeBookButton;
+	JButton cancelRemove;
+	JButton confirmRemove;
+	JLabel askRemove;
 
 	JTextField searchInput;
 	JButton searchButton;
@@ -223,6 +226,30 @@ public class InsertBookForm extends JDialog {
 		
 		removeBookButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+
+
+				cancelRemove.setVisible(true);
+				confirmRemove.setVisible(true);
+				askRemove.setVisible(true);
+				print("-----");
+//				cancelRemove.setVisible(true);
+//				confirmRemove.setVisible(true);
+				removeGroupRemove();
+			}
+		});
+		
+		cancelRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				print("-confirmRemove");
+				cancelRemove.setVisible(false);
+				confirmRemove.setVisible(false);
+				askRemove.setVisible(true);
+			}
+		});
+		
+		confirmRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				if (selectedCells.size() > 0) {
 					
 				} else {
@@ -312,6 +339,10 @@ public class InsertBookForm extends JDialog {
 					System.out.println(exc);
 					exc.printStackTrace();
 				}
+
+				cancelRemove.setVisible(false);
+				confirmRemove.setVisible(false);
+				askRemove.setVisible(false);
 			}
 		});
 
@@ -412,7 +443,6 @@ public class InsertBookForm extends JDialog {
 		            	}
 		            }
 				}
-				
 			}
 		});
 		
@@ -513,7 +543,21 @@ public class InsertBookForm extends JDialog {
         });
 	}
 	
+void removeGroupRemove() {
 
+	new java.util.Timer().schedule( 
+	        new java.util.TimerTask() {
+	            @Override
+	            public void run() {
+	                // your code here
+	cancelRemove.setVisible(false);
+	confirmRemove.setVisible(false);
+	askRemove.setVisible(false);
+	            }
+	        }, 
+	        5000 
+	);
+}
 
 	// methods
 	String getSearchText() {
@@ -705,6 +749,28 @@ public class InsertBookForm extends JDialog {
 
 	    ownerMark = new JLabel("Vũ Quý Đạt - MSSV: 20176082 - Lớp: Vuwit16b");
 		ownerMark.setBounds(10,700,1180,30);
+		
+
+
+	    askRemove = new JLabel("Bạn có chắc chắn muốn xoá những sách đã chọn!", SwingConstants.CENTER);
+	    askRemove.setBounds(100, 160, 1000, 30);
+		
+		cancelRemove =  new JButton("Huỷ");
+		cancelRemove.setBounds(500, 190, 80, 30);
+		cancelRemove.setForeground(Color.RED);
+		
+
+		confirmRemove =  new JButton("Xoá");
+		confirmRemove.setBounds(580, 190, 80, 30);
+		confirmRemove.setBackground(Color.BLUE);
+		confirmRemove.setForeground(Color.BLUE);
+		add(cancelRemove);
+		add(confirmRemove);
+		add(askRemove);
+
+		askRemove.setVisible(false);
+		cancelRemove.setVisible(false);
+		confirmRemove.setVisible(false);
 	    
 		add(name);
 		add(nameInput);
