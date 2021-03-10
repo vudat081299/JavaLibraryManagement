@@ -10,10 +10,10 @@ Management borrowed and returned books: create a borrowed and returned form, vie
 > UI of project is vietnamese.
 
 # **Prerequire** to run successfully this project:
-1. A mysql installed (search Microsoft website instruction install mysql on MacOS).
-2. A eclipse installed.
-3. A MySQLWorkBench installed. (you still be able to run this project to take a look at the UI with no need MySQLWorkBench).
-4. A mysql Connector file was locate in main repo, in eclipse, you must config path from eclipse to mysql Connector file to have the ability to connect to DB
++ A mysql installed (search Microsoft website instruction install mysql on MacOS).
++ A eclipse installed.
++ A MySQLWorkBench installed. (you still be able to run this project to take a look at the UI with no need MySQLWorkBench).
++ A mysql Connector file was locate in main repo, in eclipse, you must config path from eclipse to mysql Connector file to have the ability to connect to DB
 
 # How to **run this project**?
 1. Open project, and click run with Frame1.java as entry file of app.
@@ -27,6 +27,7 @@ Management borrowed and returned books: create a borrowed and returned form, vie
 + StaffManagement.java (this file was name wrong, it manage borrow form).
 
 # How to **connect database**?
+### Follow step by step:
 1. Create a database in MySQLWorkBench, remember your username and password.
 2. Check all file in app which create model of Database, you will find the config to make query to DB, depend on the (insert into Table ..) query you can create a correct table in MySQLWorkBench.
 3. Make sure your DB server in run, check it, if not, access System Reference, click mysql icon at the bottom (appear when your Mac installed MySQL).
