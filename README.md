@@ -33,4 +33,6 @@ StaffManagement.java (this file was name wrong, it manage borrow form).
 
 # How to **use** this app in UI?
 Find it yourself.
-if you cannot know how to use a feature in the UI after atleast 100 times try, **contact me**: [vudat81299@gmail.com].
+
+# Cannot find **how to use this app** properly?
+if you cannot know how to use a feature in the UI after atleast 100 times try, **contact me**: [vudat81299@gmail.com]. I will help you.
