@@ -1,8 +1,8 @@
 # Java Library Management - eclipse MacOS
 
-<div align='center'>
-  ![221251d3281dd7770a2a78abc8bdcc78](https://cdn.dribbble.com/users/1010637/screenshots/11280628/media/221251d3281dd7770a2a78abc8bdcc78.png?compress=1&resize=300x225)
-</div>
+<h3 align="center">
+  <img src="https://cdn.dribbble.com/users/1010637/screenshots/11280628/media/221251d3281dd7770a2a78abc8bdcc78.png?compress=1&resize=300x225">
+</h3>
 
 # Feature?
 + Book: view books in lib, add, search, delete.
