@@ -7,8 +7,9 @@ Book: view books in lib, add, search, delete.
 Reader: view readers registed, add, search, delete.
 Management borrowed and returned books: create a borrowed and returned form, view detail of form, comfirm form, delete form, search form in DB.
 
-###UI of project is vietnamese.
-#**Prerequire** to run successfully this project:
+> UI of project is vietnamese.
+
+# **Prerequire** to run successfully this project:
 1. A mysql installed (search Microsoft website instruction install mysql on MacOS).
 2. A eclipse installed.
 3. A MySQLWorkBench installed. (you still be able to run this project to take a look at the UI with no need MySQLWorkBench).
