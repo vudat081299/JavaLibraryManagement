@@ -1,11 +1,11 @@
 # Java Library Management - eclipse MacOS
 
-![221251d3281dd7770a2a78abc8bdcc78](https://user-images.githubusercontent.com/55421234/110564882-26b31680-8180-11eb-8cbf-13a93852abbd.png)
+![221251d3281dd7770a2a78abc8bdcc78](https://cdn.dribbble.com/users/1010637/screenshots/11280628/media/221251d3281dd7770a2a78abc8bdcc78.png?compress=1&resize=300x225)
 
 # Feature?
-Book: view books in lib, add, search, delete.
-Reader: view readers registed, add, search, delete.
-Management borrowed and returned books: create a borrowed and returned form, view detail of form, comfirm form, delete form, search form in DB.
++ Book: view books in lib, add, search, delete.
++ Reader: view readers registed, add, search, delete.
++ Management borrowed and returned books: create a borrowed and returned form, view detail of form, comfirm form, delete form, search form in DB.
 
 > UI of project is vietnamese.
 
