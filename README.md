@@ -16,15 +16,15 @@ Management borrowed and returned books: create a borrowed and returned form, vie
 4. A mysql Connector file was locate in main repo, in eclipse, you must config path from eclipse to mysql Connector file to have the ability to connect to DB
 
 # How to **run this project**?
-1. Open project, and click run with Frame1.java is entry file of app.
+1. Open project, and click run with Frame1.java as entry file of app.
 
 # This project contain some trash file not relate to Java but this all file you should **concern** to:
-Frame1.java (entry file)
-InsertReader.java (reader management).
-DetailForm.java (view detail of a borrow book form).
-InsertBookForm.java (manage the book in library and can insert book in to library).
-RentManagement.java (manage, create borrow book form).
-StaffManagement.java (this file was name wrong, it manage borrow form).
++ Frame1.java (entry file)
++ InsertReader.java (reader management).
++ DetailForm.java (view detail of a borrow book form).
++ InsertBookForm.java (manage the book in library and can insert book in to library).
++ RentManagement.java (manage, create borrow book form).
++ StaffManagement.java (this file was name wrong, it manage borrow form).
 
 # How to **connect database**?
 1. Create a database in MySQLWorkBench, remember your username and password.
