@@ -11,6 +11,12 @@
 
 > UI of project is vietnamese.
 
+# **Purpose** of this project?
+> + Learn how connect to DB.
+> + Create basic query to DB.
+> + Build a basic UI. (get used to using JDialog, JTable, JPanelScoll, JButton, JLabel, JTextField)
+> + Learn how pass data to other class. 
+
 # **Prerequire** to run successfully this project:
 + A mysql installed (search Microsoft website instruction install mysql on MacOS).
 + A eclipse installed.
