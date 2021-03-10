@@ -18,7 +18,7 @@
 + A mysql Connector file was locate in main repo, in eclipse, you must config path from eclipse to mysql Connector file to have the ability to connect to DB
 
 # How to **run this project**?
-1. Open project, and click run with Frame1.java as entry file of app.
+1. Clone and open project in eclipse, click run with Frame1.java as entry file of app.
 
 # This project contain some trash file not relate to Java but this all file you should **concern** to:
 + Frame1.java (entry file)
