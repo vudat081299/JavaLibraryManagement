@@ -1,4 +1,8 @@
 # Java Library Management - eclipse MacOS
+
+![Image of Yaktocat](https://dribbble.com/shots/11280628-Library-illustration/attachments/2889094?mode=media)
+
+
 - Feature?
 Book: view books in lib, add, search, delete.
 Reader: view readers registed, add, search, delete.
