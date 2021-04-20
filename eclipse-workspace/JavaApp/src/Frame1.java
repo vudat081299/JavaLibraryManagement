@@ -1,4 +1,5 @@
 import java.awt.EventQueue;
+import java.awt.List;
 //import com.sql,DriverManager;
 //import com.mysql.jdbc.Connection;
 import java.sql.*;
@@ -15,7 +16,7 @@ public class Frame1 {
 	private JFrame frame;
 	static int week = 0;
 	boolean renderLibraryUI = true;
-	int app = 1; // 0 is homework | 1 is Library Management | 2 is Hotel Management
+	int app = 3; // 0 is homework | 1 is Library Management | 2 is Hotel Management | 3 is factory management.
 	String titleOfAppFrame = "Quản lý thư viện";
 	String titleOfBookManagementFrame = "Quản lý đầu sách";
 	String titleOfReaderManagementFrame = "Quản lý độc giả";
@@ -24,6 +25,15 @@ public class Frame1 {
 	String titleHotelManagement = "Quản lý khách sạn";
 	String titleRoomManagement = "Quản lý phòng khách sạn";
 	String titleBookingRoomManagement = "Quản lý đặt phòng ";
+	
+	String titleFactoryManagement = "Quản lý kho hàng";
+
+	int x = 0, y = 0;
+	static String[] functionList = {
+			"Tạo phiếu thu", "Tạo phiếu chi", "Tạo phiếu nhập", "Tạo phiếu xuất", 
+			"Tạo chứng từ nhập", "Tạo chứng từ xuất", "Thêm khách hàng", "Thêm hàng hoá"};
+	JButton[] buttons = new JButton[8];
+	
 	/**
 	 * Launch the application.
 	 */
@@ -72,7 +82,48 @@ public class Frame1 {
 			initialize();
 		} else if (app == 1) {
 			initLibraryManagementUI();
+		} else if (app == 3) {
+			initFactoryManagement();
 		}
+	}
+	
+	private void initFactoryManagement() {
+		frame = new JFrame();
+		frame.setBounds(0, 0, 2000, 2000);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setTitle(titleFactoryManagement);
+		
+		for (int i = 0; i < functionList.length; i++) {
+			x = 40 + 220 * (i % 4);
+			y = 20;
+			if (i >= 4) {
+				y = 120;
+			}
+			
+			buttons[i] = new JButton(functionList[i]);
+			buttons[i].setBounds(x, y, 200, 90);
+			int id = i;
+			buttons[i].addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					FactoryForms form = new FactoryForms(id);
+					form.pack();
+//					form.setBounds(frame.getBounds().width/8, 
+//							frame.getBounds().height/8, 
+//							(frame.getBounds().width * 3) / 4,
+//							(frame.getBounds().height * 3) / 4);
+					form.setBounds(0, 0, 2000, 2000);
+					form.setVisible(true);
+				}
+			});
+			frame.getContentPane().setLayout(null);
+			frame.getContentPane().add(buttons[i]);
+		
+		}
+
+		JLabel markOwner = new JLabel("Vũ Quý Đạt - 20176082 - Bài thực hành đồ án môn học");
+		markOwner.setBounds(40,220,400,50);
+		frame.getContentPane().add(markOwner);
+		
 	}
 	
 	private void initLibraryManagementUI() {
